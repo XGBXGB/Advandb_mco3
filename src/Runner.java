@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -23,11 +24,11 @@ public class Runner {
 	private String iso_level="";
 	private Client myClient;
 	private Server myServer;
-	private final String name = "PALAWAN";
+	private final String name = "CENTRAL";
 	Thread client, server;
 	
 	public void executeTransactions(String query, String scope, int lockIdentifier, String query2, String scope2, int lockIdentifier2){
-		
+		try{
 		Transaction t1, t2;
 		if(query.startsWith("SELECT")){//if t1 is read
 			t1 = new Transaction2(query, scope, lockIdentifier);
@@ -37,7 +38,7 @@ public class Runner {
 				readPalawan((Transaction2)t1);
 			}
 			else if(scope.equals("MARINDUQUE")){
-				//readMarinduque(t1);
+				readMarinduque((Transaction2)t1);
 			}
 			else{
 				readBoth((Transaction2)t1);
@@ -68,7 +69,7 @@ public class Runner {
 				//readMarinduque(t2);
 			}
 			else {
-				//readBoth(t2);
+				readBoth((Transaction2)t2);
 			}
 		}else{//if t2 is write
 			t2 = new Transaction1(query2, scope2, lockIdentifier2);
@@ -84,7 +85,9 @@ public class Runner {
 				writeBoth(t2);
 			}
 		}
-		
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -157,20 +160,18 @@ public class Runner {
 		}
 	}
 	
-	public void readPalawan(Transaction2 t){
+	public void readPalawan(Transaction2 t)throws SQLException{
 		if(name.equalsIgnoreCase("PALAWAN")){
-			Thread x = new Thread(t);
-			x.start();
-			while(true){
-				if(t.getResultSet()!=null)
-					break;
-			}
+			t.beginTransaction();
+			t.start();
+			
 			Driver.printResultSet(t.getResultSet());
 				//execute from self
 		}
 		else if(name.equalsIgnoreCase("CENTRAL")){
-			Thread x = new Thread(t);
-			x.start();
+			t.beginTransaction();
+			t.start();
+			
 			Driver.printResultSet(t.getResultSet());
 			//return result to driver
 		}
@@ -179,7 +180,8 @@ public class Runner {
 				try{
 					String message = "\"READREQUEST\" ";
 					byte[] prefix = message.getBytes();
-					byte[] trans = serialize(t);
+					SerializableTrans st = new SerializableTrans(t.getQuery(), t.getLockIdentifier());
+					byte[] trans = serialize(st);
 					byte[] fin = byteConcat(prefix,trans);
 					myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
 				}catch(IOException e){
@@ -191,16 +193,18 @@ public class Runner {
 		}
 	}
 	
-	public void readMarinduque(Transaction2 t){
+	public void readMarinduque(Transaction2 t) throws SQLException{
 		if(name.equalsIgnoreCase("MARINDUQUE")){
-			Thread x = new Thread(t);
-			x.start();
+			t.beginTransaction();
+			t.start();
+			
 			Driver.printResultSet(t.getResultSet());
 		}
 		else if(name.equalsIgnoreCase("CENTRAL")){
 			//execute read from self
-			Thread x = new Thread(t);
-			x.start();
+			t.beginTransaction();
+			t.start();
+			
 			Driver.printResultSet(t.getResultSet());
 		}
 		
@@ -209,9 +213,12 @@ public class Runner {
 				try{
 					String message = "\"READREQUEST\" ";
 					byte[] prefix = message.getBytes();
-					byte[] trans = serialize(t);
+					SerializableTrans st = new SerializableTrans(t.getQuery(), t.getLockIdentifier());
+					byte[] trans = serialize(st);
 					byte[] fin = byteConcat(prefix,trans);
 					myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
+					
+					
 				}catch(IOException e){
 					e.printStackTrace();
 				}
@@ -221,13 +228,14 @@ public class Runner {
 		}
 	}
 	
-	public void readBoth(Transaction2 t){
+	public void readBoth(Transaction2 t)throws SQLException{
 		if(name.equalsIgnoreCase("CENTRAL")){
-			Thread x = new Thread(t);
-			x.start();
+			t.beginTransaction();
+			t.start();
+			
 			Driver.printResultSet(t.getResultSet());
 		}else{
-			if(true){
+			if(myClient.checkCentralIfExists()){
 				try{
 					Driver.printMessage("CENTRAL EXISTS");
 					String message = "\"READREQUEST\" ";

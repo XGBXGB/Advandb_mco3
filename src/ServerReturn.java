@@ -34,7 +34,7 @@ public class ServerReturn{
         
     }
     
-    public void RECEIVE(Socket X){
+    public synchronized void RECEIVE(Socket X){
     	parent.printMessage("IN RECIEVE");
     	extractByte(X);
     	if(current!=-1){

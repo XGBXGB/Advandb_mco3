@@ -38,7 +38,7 @@ public class Driver {
 				runner.joinHost(("\"JOIN\" "+runner.getName())+"\u001a", InetAddress.getByName(ip), hostName);
 			}
 			else if(condition==3){
-				runner.executeTransactions("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage>94;", "BOTH", 0, "SELECT * FROM hpq_crop;", "BOTH", 1);
+				runner.executeTransactions("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage>94;", "BOTH", 0, "SELECT hpq_hh_id, id FROM hpq_crop WHERE crop_line=3;", "BOTH", 1);
 			}
 			else if(condition==2){
 				if(runner.getMyServer()==null){
@@ -70,6 +70,7 @@ public class Driver {
 	
 	public static void printResultSet(CachedRowSetImpl rs){
 		try{
+			System.out.println("TRANSACTION BATCH:!!!!!!!!!");
 			while(rs.next()){
 				System.out.println("RS: "+rs.getString(1));
 			}

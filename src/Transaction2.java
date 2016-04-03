@@ -9,7 +9,7 @@ import java.util.concurrent.CyclicBarrier;
 
 import com.sun.rowset.CachedRowSetImpl;
 
-public class Transaction2 implements Transaction, Runnable, Serializable{
+public class Transaction2 implements Transaction, Serializable{
 	int lockIdentifier;
 	String scope;
 	String query;
@@ -95,17 +95,6 @@ public class Transaction2 implements Transaction, Runnable, Serializable{
 		
 	}
 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		try {
-			beginTransaction();
-			start();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	@Override
 	public void start() {
@@ -124,10 +113,6 @@ public class Transaction2 implements Transaction, Runnable, Serializable{
 			String unlock = "UNLOCK TABLES;";
 			Statement stmt2 = con.createStatement();
 			stmt2.execute(unlock);
-			while(true){
-				if(cs!=null)
-					break;
-			}
 			System.out.println("DONE EXECUTING TRANS2 "+query);
 		}catch(SQLException e){
 			e.printStackTrace();

@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 
 public class Client implements Runnable{
     Socket SOCK;
-    int port = 1212;
+    int port = 1414;
     ArrayList<InetAddress> hosts;
     ArrayList<String> names;
     Scanner INPUT;
@@ -141,6 +141,7 @@ public class Client implements Runnable{
     public boolean checkCentralIfExists(){
     	try{
     		Socket s = new Socket(hosts.get(names.indexOf("CENTRAL")), port);
+    		s.close();
     	}catch(IOException e){
     		e.printStackTrace();
     		return false;
@@ -151,6 +152,7 @@ public class Client implements Runnable{
     public boolean checkPalawanIfExists(){
     	try{
     		Socket s = new Socket(hosts.get(names.indexOf("PALAWAN")), port);
+    		
     	}catch(IOException e){
     		e.printStackTrace();
     		return false;
