@@ -124,7 +124,11 @@ public class Transaction2 implements Transaction, Runnable, Serializable{
 			String unlock = "UNLOCK TABLES;";
 			Statement stmt2 = con.createStatement();
 			stmt2.execute(unlock);
-			
+			while(true){
+				if(cs!=null)
+					break;
+			}
+			System.out.println("DONE EXECUTING TRANS2 "+query);
 		}catch(SQLException e){
 			e.printStackTrace();
 		}

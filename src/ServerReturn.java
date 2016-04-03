@@ -48,24 +48,26 @@ public class ServerReturn{
 	            	Thread x = new Thread(t);
 	            	x.start();
 	            	while(true){
-	            		if(t.getResultSet()!=null)
+	            		if(t.getResultSet()!=null){
+	            			parent.printMessage("BREAK");
 	            			break;
+	            		}else
+	            			parent.printMessage("NULLSE");
 	            	}
+	            	parent.printMessage("AFTER WHILE LOOP");
 	            	DatabaseObject dbo = new DatabaseObject(t.getResultSet());
 	            	String first="\"RETURNREADREQUEST\" ";
-	            	String msg = "\"JOIN\" nameeeee"+"\u001a";
 	            	byte[] prefix = first.getBytes();
 	            	byte[] dboBytes = serialize(dbo);
 	            	byte[] finalByte = byteConcat(prefix, dboBytes);
 	            	parent.printMessage("ADDRESS IN RETURN REQUEST: "+X.getInetAddress());
-	            	parent.sendToHost(msg.getBytes(), X.getInetAddress());
+	            	parent.sendToHost(finalByte, X.getInetAddress());
 	            	
 	        	}else if(messageType.contains("\"RETURNREADREQUEST\"")){
 	        		DatabaseObject dbo = (DatabaseObject)deserialize(mybytearray);
 	        		CachedRowSetImpl rs = dbo.getResultSet();
-	        		while(rs.next()){
-	        			parent.printResultSet(rs);;
-	        		}
+	        		parent.printResultSet(rs);
+	        			
 	        	}else if(messageType.contains("\"JOIN\"")){
 	        		String name = extractName(mybytearray);
 	        		parent.printMessage(name);

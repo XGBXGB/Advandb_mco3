@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 
 public class Client implements Runnable{
     Socket SOCK;
-    int port = 1616;
+    int port = 1212;
     ArrayList<InetAddress> hosts;
     ArrayList<String> names;
     Scanner INPUT;

@@ -23,7 +23,7 @@ public class Runner {
 	private String iso_level="";
 	private Client myClient;
 	private Server myServer;
-	private final String name = "CENTRAL";
+	private final String name = "PALAWAN";
 	Thread client, server;
 	
 	public void executeTransactions(String query, String scope, int lockIdentifier, String query2, String scope2, int lockIdentifier2){
@@ -227,16 +227,15 @@ public class Runner {
 			x.start();
 			Driver.printResultSet(t.getResultSet());
 		}else{
-			if(myClient.checkCentralIfExists()){
+			if(true){
 				try{
 					Driver.printMessage("CENTRAL EXISTS");
 					String message = "\"READREQUEST\" ";
-					String msg = "\"JOIN\" "+name+"\u001a";
 					byte[] prefix = message.getBytes();
 					SerializableTrans st = new SerializableTrans(t.getQuery(),t.getLockIdentifier());
 					byte[] trans = serialize(st);
 					byte[] fin = byteConcat(prefix,trans);
-					myClient.SEND(msg.getBytes(), myClient.getAddressFromName("CENTRAL"));
+					myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
 				}catch(IOException e){
 					e.printStackTrace();
 				}
@@ -300,6 +299,7 @@ public class Runner {
 			client = new Thread(myClient);
 			client.start();
 			myClient.JOIN(name, ip, hostName);
+			Driver.printMessage("MYCLIENT IS NULL");
 		}else{
 			myClient.JOIN(name, ip, hostName);
 		}
