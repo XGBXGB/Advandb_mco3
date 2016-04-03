@@ -1,84 +1,80 @@
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
+import java.net.InetAddress;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Scanner;
 
-import javax.swing.JOptionPane;
-
+import com.sun.rowset.CachedRowSetImpl;
 
 public class Driver {
-
 	
+	public static void printMessage(String message){
+		System.out.println(message);
+	}
 	public static void main(String[] args){
-		final CyclicBarrier gate = new CyclicBarrier(6);
-		Transaction1 t1 = new Transaction1(gate, "1");
-		t1.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-		Thread x = new Thread(t1);
-		
-		Transaction1 t11 = new Transaction1(gate,"2");
-		t11.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-		Thread x11 = new Thread(t11);
-		
-		Transaction2 t2 = new Transaction2(gate,"Z1");
-		t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-		Thread x2 = new Thread(t2);
-		
-		Transaction2 t22 = new Transaction2(gate,"Z2");
-		t22.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-		Thread x22 = new Thread(t22);
-		
-		Transaction1 t111 = new Transaction1(gate,"3");
-		t111.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-		Thread x111 = new Thread(t111);
-		
-		x.start();
-		
-		x11.start();
-		
-		x2.start();
-		
-		x22.start();
-		
-		x111.start();
-		
-		try {
-			gate.await();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (BrokenBarrierException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		Runner runner = new Runner();
+		Scanner sc = new Scanner(System.in);
+		int condition=0;
+		try{
+		do{
+			System.out.println("Menu:");
+			System.out.println("[1] Connect to a host");
+			System.out.println("[2] Start server");
+			System.out.println("[3] Read Palawan transaction");
+			System.out.println("[4] Read Marinduque transaction");
+			System.out.println("[5] Read Both transaction");
+			System.out.println("[6] Write Palawan transaction");
+			System.out.println("[7] Write Marinduque transaction");
+			System.out.println("[8] Write Both transaction");
+			System.out.println("[9] Read data");
+			condition = sc.nextInt();
+			if(condition==1){
+				System.out.println("Input the port of the server to connect to:");
+				int port = sc.nextInt();
+				System.out.println("Input the IP address of the server to connect to:");
+				sc.nextLine();
+	            String ip = sc.nextLine();
+	            System.out.println("Input name of host:");
+	            String hostName = sc.nextLine();
+				runner.joinHost(("\"JOIN\" "+runner.getName())+"\u001a", InetAddress.getByName(ip), hostName);
+			}
+			else if(condition==3){
+				runner.executeTransactions("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage>94;", "BOTH", 0, "SELECT * FROM hpq_crop;", "BOTH", 1);
+			}
+			else if(condition==2){
+				if(runner.getMyServer()==null){
+					System.out.println("Input the port of server to be created:");
+					int port = sc.nextInt();
+					runner.startServer(port);
+				}else
+					System.out.println("Server is already running.");
+			}
+			else if(condition==4){
+				if(runner.getMyServer()!=null)
+					runner.stopServer();
+				else
+					System.out.println("Server is not running.");
+			}else if(condition==5){
+				if(runner.getMyClient()!=null){
+					//runner.readPalawan();
+				}
+			}else if(condition==9){
+				runner.executeTransactions("SELECT * FROM hpq_death;", "BOTH", 0, "SELECT * FROM hpq_mem;", "BOTH", 1);
+			}
+		}while(condition != -1);
+		}catch(Exception e){
+			e.printStackTrace();
+			sc.close();
 		}
-		
-		/*Server SER = new Server();
-        Thread X = new Thread(SER);
-        X.start();
-        new Client();*/
+		sc.close();
 	}
 	
-	/*public static void Connect(){
-        try{
-            final int PORT = 444;
-            final String HOST = "192.168.1.6";
-            Socket SOCK = new Socket(HOST,PORT);
-            System.out.println("You connected to: " + HOST);
-            
-            ChatClient = new Client(SOCK);
-            
-            
-            PrintWriter OUT = new PrintWriter(SOCK.getOutputStream());
-            OUT.println(UserName);
-            OUT.flush();
-            
-            Thread X = new Thread(ChatClient);
-            X.start();
-        }
-        catch(Exception X){
-            System.out.println(X);
-            JOptionPane.showMessageDialog(null,"Server not reponding");
-            System.exit(0);
-        }
-            
-    }*/
+	public static void printResultSet(CachedRowSetImpl rs){
+		try{
+			while(rs.next()){
+				System.out.println("RS: "+rs.getString(1));
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+	}
 }

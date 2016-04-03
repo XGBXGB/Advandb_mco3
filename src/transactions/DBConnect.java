@@ -1,3 +1,4 @@
+package transactions;
 
 
 import java.sql.Connection;
@@ -25,7 +26,7 @@ public class DBConnect {
     private DBConnect() {
         driverName = "com.mysql.jdbc.Driver";
         url = "jdbc:mysql://localhost:3306/";
-        database = "db_hpq?autoReconnect=true&useSSL=false";
+        database = "dummy_schema";
         username = "root";
         password = "xgbawesome";//tempo
     }

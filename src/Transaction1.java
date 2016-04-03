@@ -1,19 +1,25 @@
+import java.io.Serializable;
+import com.sun.rowset.CachedRowSetImpl;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-public class Transaction1 implements Transaction, Runnable{
+public class Transaction1 implements Transaction, Runnable, Serializable{
+	int lockIdentifier;
+	String scope;
+	String query;
 	Connection con;
 	Statement stmt;
-	CyclicBarrier gate;
-	String condition;
+	CachedRowSetImpl cs;
 	
-	public Transaction1(CyclicBarrier gate, String condition){
-		this.gate = gate;
-		this.condition = condition;
+	public Transaction1(String query, String scope, int lockIdentifier){
+		this.lockIdentifier = lockIdentifier;
+		this.query = query;
+		this.scope = scope;
 		con = DBConnect.getConnection();
 	}
 	
@@ -76,15 +82,6 @@ public class Transaction1 implements Transaction, Runnable{
 
 	@Override
 	public void run() {
-		try {
-			gate.await();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (BrokenBarrierException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		// TODO Auto-generated method stub
 		try {
 			beginTransaction();
@@ -98,9 +95,14 @@ public class Transaction1 implements Transaction, Runnable{
 	@Override
 	public void start() {
 		try{
-			String lock = "LOCK TABLES people WRITE;";
+			String lock="";
+			if(lockIdentifier%2==0)
+				lock = "LOCK TABLES hpq_death WRITE;";
+			else
+				lock = "LOCK TABLES hpq_crop WRITE;";
+			
 			stmt.execute(lock);
-			String SQL = "UPDATE people SET name = 'wakokiii' WHERE id = "+condition+";";
+			String SQL = query;
 			stmt.executeUpdate(SQL);
 			String unlock = "UNLOCK TABLES;";
 			stmt.execute(unlock);
@@ -117,21 +119,19 @@ public class Transaction1 implements Transaction, Runnable{
 		Lock locker = Lock.getInstance();
 		locker.unlock(this);
 	}
+	
+	public ResultSet getResultSet(){
+		return null;
+	}
 
-
-
-	@Override
-	public void setCondition(String condition) {
-		// TODO Auto-generated method stub
-		
+	public int getLockIdentifier() {
+		return lockIdentifier;
 	}
 
 
 
-	@Override
-	public String getCondition() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getQuery() {
+		return query;
 	}
 
 }

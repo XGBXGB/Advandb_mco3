@@ -16,61 +16,85 @@ import javax.swing.JOptionPane;
 
 
 public class Server implements Runnable{
-    public static ArrayList<Socket> ConnectionArray = new ArrayList<Socket>();
-    public static ArrayList<String> CurrentUsers = new ArrayList<String>();
+    public static ArrayList<InetAddress> ConnectionArray = new ArrayList<InetAddress>();
+    public static ArrayList<String> CurrentNodes = new ArrayList<String>();
+    static int port;
+    int flag=0;
+    Runner parent;
     
-    
+    public int getFlag() {
+		return flag;
+	}
+
+	public void setFlag(int flag) {
+		this.flag = flag;
+	}
+
+	public Server(int port, Runner parent){
+    	this.port = port;
+    	this.parent = parent;
+    }
+	
+	public void addNodeName(String name){
+		CurrentNodes.add(name);
+	}
+	
+	public String getNameFromIP(Socket s){
+		for(int i=0; i<ConnectionArray.size(); i++){
+			if(ConnectionArray.get(i).equals(s.getInetAddress())){
+				return CurrentNodes.get(i);
+			}
+		}
+		return null;
+	}
     
     public void run(){
         try{
-        	final int PORT = 444;
-            ServerSocket SERVER = new ServerSocket(PORT);
-            System.out.println("Waiting for clients");
+            ServerSocket SERVER = new ServerSocket(port);
+            parent.printMessage("Server started.");
             
             while(true){
+            	if(flag==1){
+            		parent.printMessage("SERVER STOPPED");
+            		break;
+            	}
+            	
             	Socket SOCK = SERVER.accept();
-                ConnectionArray.add(SOCK);
+            	if(!ConnectionArray.contains(SOCK.getInetAddress())){
+            		parent.printMessage("SOCKET added to connections");
+            		ConnectionArray.add(SOCK.getInetAddress());
+            		//addNode(SOCK);
+            	}
                 
-                System.out.println("Client connected from: "+SOCK.getLocalAddress().getHostName());
-                
-                AddUserName(SOCK);
-                
-                ServerReturn CHAT = new ServerReturn(SOCK);
-                Thread X = new Thread(CHAT);
-                X.start();
-                UpdateUsers(); 
+                //parent.printMessage("Client connected from: "+SOCK.getLocalAddress().getHostName());
+                new ServerReturn(SOCK, parent);
             }
+            parent.printMessage("SERVER STOP CHECK");
+            SERVER.close();
         }catch(IOException X){
                 X.printStackTrace();
         }
    }
     
-    public static void AddUserName(Socket X) throws IOException {
-        Scanner INPUT = new Scanner(X.getInputStream());
-        String UserName = INPUT.nextLine();
-        CurrentUsers.add(UserName);
-        
-        for(int i=1; i<= Server.ConnectionArray.size(); i++){
-            Socket TEMP_SOCK = (Socket) Server.ConnectionArray.get(i-1);
-            PrintWriter OUT = new PrintWriter(TEMP_SOCK.getOutputStream());
-            OUT.println("#?!" + CurrentUsers);
-            OUT.flush();
-        }
-        
+    public void addNode(Socket X) throws IOException{
+    	Scanner INPUT = new Scanner(X.getInputStream());
+        String nodeName = INPUT.nextLine();
+        int trimPoint = nodeName.indexOf(":");
+        parent.printMessage(nodeName.substring(0, trimPoint)+" has connected to your server");
+        CurrentNodes.add(nodeName.substring(0, trimPoint));
     }
     
-    public static void UpdateUsers() throws IOException {
-        for(int i=0;i<Server.ConnectionArray.size();i++){
-            Socket TEMPSOCK = (Socket) Server.ConnectionArray.get(i);
-            PrintWriter OUT = new PrintWriter(TEMPSOCK.getOutputStream());
-            OUT.println("User \""+Server.CurrentUsers.get(Server.CurrentUsers.size()-1)+"\" has joined"+"\nNew set of users:");
-            //OUT.flush();
-            for(int j=0;j<Server.ConnectionArray.size();j++){
-                OUT.println("["+j+"]"+Server.CurrentUsers.get(j));
-                
-                //OUT.flush();
-            }
-            OUT.flush();
-        }
+    
+    
+    public boolean checkCentralExists(){
+    	return CurrentNodes.contains("CENTRAL");
+    }
+    
+    public boolean checkPalawanExists(){
+    	return CurrentNodes.contains("Palawan");
+    }
+    
+    public boolean checkMarinduqueExists(){
+    	return CurrentNodes.contains("Marinduque");
     }
 }
