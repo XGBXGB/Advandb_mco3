@@ -1,3 +1,4 @@
+package controller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,21 +19,29 @@ import javax.swing.JOptionPane;
 
 import com.sun.rowset.CachedRowSetImpl;
 
+import network.Client;
+import network.SerializableTrans;
+import network.Server;
+import transactions.Transaction;
+import transactions.Transaction1;
+import transactions.Transaction2;
+import view.Driver;
 
-public class Runner {
+
+public class Controller {
 	
-	private String iso_level="";
+	private int iso_level=1;
 	private Client myClient;
 	private Server myServer;
-	private final String name = "CENTRAL";
+	private String name = "";
 	Thread client, server;
 	
 	public void executeTransactions(String query, String scope, int lockIdentifier, String query2, String scope2, int lockIdentifier2){
 		try{
 		Transaction t1, t2;
-		if(query.startsWith("SELECT")){//if t1 is read
+		if(query.startsWith("SELECT")){
 			t1 = new Transaction2(query, scope, lockIdentifier);
-			t1.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
+			t1.setIsolationLevel(iso_level);
 			
 			if(scope.equals("PALAWAN")){
 				readPalawan((Transaction2)t1);
@@ -45,7 +54,7 @@ public class Runner {
 			}
 		}else{//if t1 is write
 			t1 = new Transaction1(query, scope, lockIdentifier);
-			t1.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
+			t1.setIsolationLevel(iso_level);
 			
 			if(scope.equals("PALAWAN")){
 				writePalawan(t1);
@@ -63,10 +72,10 @@ public class Runner {
 			t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
 			
 			if(scope2.equals("PALAWAN")){
-				//readPalawan(t2);
+				readPalawan((Transaction2)t2);
 			}
 			else if(scope2.equals("MARINDUQUE")){
-				//readMarinduque(t2);
+				readMarinduque((Transaction2)t2);
 			}
 			else {
 				readBoth((Transaction2)t2);
@@ -93,20 +102,20 @@ public class Runner {
 	
 	public void writePalawan(Transaction t){
 		if(name.equalsIgnoreCase("CENTRAL")){
-			if(myServer.checkPalawanExists()){
+			if(myClient.checkPalawanIfExists()){
 				//return true;
 			}else{
 				//return false;
 			}
 		}
 		else if(name.equalsIgnoreCase("PALAWAN")){
-			if(myServer.checkCentralExists()){
+			if(myClient.checkCentralIfExists()){
 				//return true;
 			}else{
 				//return false;
 			}
 		}else if(name.equalsIgnoreCase("MARINDUQUE")){
-			if(myServer.checkCentralExists() && myServer.checkPalawanExists()){
+			if(myClient.checkCentralIfExists() && myClient.checkPalawanIfExists()){
 				//return true;
 			}else{
 				//return false;
@@ -116,20 +125,20 @@ public class Runner {
 	
 	public void writeMarinduque(Transaction t){
 		if(name.equalsIgnoreCase("CENTRAL")){
-			if(myServer.checkMarinduqueExists()){
+			if(myClient.checkMarinduqueIfExists()){
 				//return true;
 			}else{
 				//return false;
 			}
 		}
 		else if(name.equalsIgnoreCase("MARINDUQUE")){
-			if(myServer.checkCentralExists()){
+			if(myClient.checkCentralIfExists()){
 				//return true;
 			}else{
 				//return false;
 			}
 		}else if(name.equalsIgnoreCase("PALAWAN")){
-			if(myServer.checkCentralExists() && myServer.checkMarinduqueExists()){
+			if(myClient.checkCentralIfExists() && myClient.checkMarinduqueIfExists()){
 				//return true;
 			}else{
 				//return false;
@@ -139,20 +148,20 @@ public class Runner {
 	
 	public void writeBoth(Transaction t){
 		if(name.equalsIgnoreCase("CENTRAL")){
-			if(myServer.checkMarinduqueExists() && myServer.checkPalawanExists()){
+			if(myClient.checkMarinduqueIfExists() && myClient.checkPalawanIfExists()){
 				//return true;
 			}else{
 				//return false;
 			}
 		}
 		else if(name.equalsIgnoreCase("MARINDUQUE")){
-			if(myServer.checkCentralExists() && myServer.checkPalawanExists()){
+			if(myClient.checkCentralIfExists() && myClient.checkPalawanIfExists()){
 				//return true;
 			}else{
 				//return false;
 			}
 		}else {
-			if(myServer.checkCentralExists() && myServer.checkMarinduqueExists()){
+			if(myClient.checkCentralIfExists() && myClient.checkMarinduqueIfExists()){
 				//return true;
 			}else{
 				//return false;
@@ -201,7 +210,6 @@ public class Runner {
 			Driver.printResultSet(t.getResultSet());
 		}
 		else if(name.equalsIgnoreCase("CENTRAL")){
-			//execute read from self
 			t.beginTransaction();
 			t.start();
 			
@@ -232,7 +240,6 @@ public class Runner {
 		if(name.equalsIgnoreCase("CENTRAL")){
 			t.beginTransaction();
 			t.start();
-			
 			Driver.printResultSet(t.getResultSet());
 		}else{
 			if(myClient.checkCentralIfExists()){
@@ -272,14 +279,6 @@ public class Runner {
 	    os.writeObject(obj);
 	    return out.toByteArray();
 	}
-	public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
-	    ByteArrayInputStream in = new ByteArrayInputStream(data);
-	    ObjectInputStream is = new ObjectInputStream(in);
-	    return is.readObject();
-	}
-	
-	
-	
 	
 	public Client getMyClient() {
 		return myClient;
@@ -289,6 +288,10 @@ public class Runner {
 		return myServer;
 	}
 
+	public void setName(String name){
+		this.name = name;
+	}
+	
 	public String getName(){
 		return name;
 	}
@@ -301,39 +304,12 @@ public class Runner {
 		myClient.SEND(msg, receiver);
 	}
 	
-	public void joinHost(String msg, InetAddress ip, String hostName){
-		if(myClient==null){
-			myClient = new Client(this);
-			client = new Thread(myClient);
-			client.start();
-			myClient.JOIN(name, ip, hostName);
-			Driver.printMessage("MYCLIENT IS NULL");
-		}else{
-			myClient.JOIN(name, ip, hostName);
-		}
+	
+	public void startClient(){
+		myClient = new Client(this);
+		client = new Thread(myClient);
+		client.start();
 	}
-	
-	
-	/*public void connectToHost (String host, int port){
-		if(myClient==null){
-			myClient = new Client(this);
-			client = new Thread(myClient);
-			client.start();
-			myClient.addHost(host, port);
-		}else{
-			myClient.addHost(host, port);
-		}
-	}*/
-	
-	/*public void disconnectFromHosts(){
-		try{
-			//myClient.DISCONNECT();
-			myClient.setFlag(1);
-			myClient = null;
-		}catch (IOException e){
-			e.printStackTrace();
-		}
-	}*/
 	
 	public void startServer(int port){
 		myServer = new Server(port, this);
@@ -346,20 +322,8 @@ public class Runner {
 		myServer = null;
 	}
 	
-	public void setIsoLevel(String iso_level){
+	public void setIsoLevel(int iso_level){
 		this.iso_level = iso_level;
-		/*
-		 case ISO_READ_UNCOMMITTED: //ps.setString(1, "READ UNCOMMITTED"); 
-						con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-					break;
-				case ISO_READ_COMMITTED: //ps.setString(1, "READ COMMITTED");
-						con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-					break;
-				case ISO_REPEATABLE_READ: //ps.setString(1, "REPEATABLE READ");
-						con.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-				 	break;
-				case ISO_SERIALIZABLE:
-		 */
 	}
 	
 	public void printResultSet(CachedRowSetImpl rs){

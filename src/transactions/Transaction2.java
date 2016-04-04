@@ -1,4 +1,5 @@
 package transactions;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,18 +8,40 @@ import java.sql.Timestamp;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-public class Transaction2 implements Transaction, Runnable{
-	String condition;
+import com.sun.rowset.CachedRowSetImpl;
+
+import database.DBConnect;
+
+public class Transaction2 implements Transaction, Serializable{
+	int lockIdentifier;
+	String scope;
+	String query;
 	Connection con;
 	Statement stmt;
-	CyclicBarrier gate;
+	CachedRowSetImpl cs;
 	
-	public Transaction2(CyclicBarrier gate, String condition){
-		this.gate = gate;
-		this.condition = condition;
+	public Transaction2(String query, String scope, int lockIdentifier){
+		this.lockIdentifier = lockIdentifier;
+		this.scope = scope;
+		cs = null;
+		this.query = query;
 		con = DBConnect.getConnection();
 	}
 	
+	
+	
+	public int getLockIdentifier() {
+		return lockIdentifier;
+	}
+
+
+
+	public String getQuery() {
+		return query;
+	}
+
+
+
 	@Override
 	public void setIsolationLevel(int iso_level) {
 		// TODO Auto-generated method stub
@@ -75,60 +98,37 @@ public class Transaction2 implements Transaction, Runnable{
 		
 	}
 
-	@Override
-	public void run() {
-		try {
-			gate.await();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (BrokenBarrierException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		// TODO Auto-generated method stub
-		try {
-			beginTransaction();
-			start();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	@Override
 	public void start() {
 		//QUERY CODE BLOCK
 		try{
-			String lock = "LOCK TABLES people READ;";
-			stmt.execute(lock);
-			String SQL = "SELECT * FROM people";
-			ResultSet rs = stmt.executeQuery(SQL);
-			String unlock = "UNLOCK TABLES;";
-			stmt.execute(unlock);
+			String lock="";
+			if(lockIdentifier%2==0)
+				lock = "LOCK TABLES hpq_death READ;";
+			else
+				lock = "LOCK TABLES hpq_crop READ;";
 			
+			stmt.execute(lock);
+			ResultSet rs = stmt.executeQuery(query);
+			cs = new CachedRowSetImpl();
+			cs.populate(rs);
+			String unlock = "UNLOCK TABLES;";
+			Statement stmt2 = con.createStatement();
+			stmt2.execute(unlock);
+			System.out.println("DONE EXECUTING TRANS2 "+query);
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public void setQuery(String query){
+		this.query = query;
+	}
+	
+	public CachedRowSetImpl getResultSet(){
+		return cs;
 	}
 
-	@Override
-	public void die() {
-		Lock locker = Lock.getInstance();
-		locker.unlock(this);
-	}
-
-	@Override
-	public void setCondition(String condition) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getCondition() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }

@@ -1,3 +1,4 @@
+package network;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -14,13 +15,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
 
+import controller.Controller;
+
 
 public class Server implements Runnable{
     public static ArrayList<InetAddress> ConnectionArray = new ArrayList<InetAddress>();
     public static ArrayList<String> CurrentNodes = new ArrayList<String>();
     static int port;
     int flag=0;
-    Runner parent;
+    Controller parent;
     
     public int getFlag() {
 		return flag;
@@ -30,7 +33,7 @@ public class Server implements Runnable{
 		this.flag = flag;
 	}
 
-	public Server(int port, Runner parent){
+	public Server(int port, Controller parent){
     	this.port = port;
     	this.parent = parent;
     }
@@ -39,14 +42,7 @@ public class Server implements Runnable{
 		CurrentNodes.add(name);
 	}
 	
-	public String getNameFromIP(Socket s){
-		for(int i=0; i<ConnectionArray.size(); i++){
-			if(ConnectionArray.get(i).equals(s.getInetAddress())){
-				return CurrentNodes.get(i);
-			}
-		}
-		return null;
-	}
+	
     
     public void run(){
         try{
@@ -66,7 +62,6 @@ public class Server implements Runnable{
             		//addNode(SOCK);
             	}
                 
-                //parent.printMessage("Client connected from: "+SOCK.getLocalAddress().getHostName());
                 new ServerReturn(SOCK, parent);
             }
             parent.printMessage("SERVER STOP CHECK");
@@ -75,26 +70,4 @@ public class Server implements Runnable{
                 X.printStackTrace();
         }
    }
-    
-    public void addNode(Socket X) throws IOException{
-    	Scanner INPUT = new Scanner(X.getInputStream());
-        String nodeName = INPUT.nextLine();
-        int trimPoint = nodeName.indexOf(":");
-        parent.printMessage(nodeName.substring(0, trimPoint)+" has connected to your server");
-        CurrentNodes.add(nodeName.substring(0, trimPoint));
-    }
-    
-    
-    
-    public boolean checkCentralExists(){
-    	return CurrentNodes.contains("CENTRAL");
-    }
-    
-    public boolean checkPalawanExists(){
-    	return CurrentNodes.contains("Palawan");
-    }
-    
-    public boolean checkMarinduqueExists(){
-    	return CurrentNodes.contains("Marinduque");
-    }
 }
