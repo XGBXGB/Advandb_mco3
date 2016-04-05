@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 import controller.Controller;
 
 public class Client implements Runnable{
-    int port = 1313;
+    int port = 2020;
     ArrayList<InetAddress> hosts;
     ArrayList<String> names;
     PrintWriter OUT;
@@ -34,8 +34,10 @@ public class Client implements Runnable{
         
         
         try {
+        	//hosts.add(InetAddress.getByName("192.168.1.131"));
 			hosts.add(InetAddress.getByName("192.168.1.148"));
-			hosts.add(InetAddress.getByName("192.168.1.118"));
+			hosts.add(InetAddress.getByName("192.168.1.131"));
+			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -43,6 +45,8 @@ public class Client implements Runnable{
         //hosts.add(InetAddress.getByName("ip"));
         names.add("MARINDUQUE");
         names.add("CENTRAL");
+        
+        
         //names.add("PALAWAN");
         
     }

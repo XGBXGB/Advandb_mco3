@@ -9,7 +9,7 @@ import com.sun.rowset.CachedRowSetImpl;
 import controller.Controller;
 
 public class Driver {
-	static final int PORT=1414;
+	static final int PORT=2020;
 	
 	public static void main(String[] args){
 		Controller runner = new Controller();

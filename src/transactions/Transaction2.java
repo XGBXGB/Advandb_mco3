@@ -17,8 +17,8 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	String query;
 	Connection con;
 	Statement stmt;
-	CachedRowSetImpl cs;
-	boolean donePopulating;
+	volatile CachedRowSetImpl cs;
+	volatile boolean donePopulating;
 	
 	public Transaction2(String query, String scope){
 		this.scope = scope;
