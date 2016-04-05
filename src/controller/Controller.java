@@ -33,67 +33,108 @@ public class Controller {
 	private int iso_level=1;
 	private Client myClient;
 	private Server myServer;
+	private CachedRowSetImpl cs;
 	private String name = "";
 	Thread client, server;
 	
-	public void executeTransactions(String query, String scope, int lockIdentifier, String query2, String scope2, int lockIdentifier2){
+	public Controller(){
+		myClient = null;
+		myServer = null;
+		cs = null;
+	}
+	
+	public void executeTransactions(String query, String scope, String query2, String scope2, boolean isGlobal){
 		try{
-		Transaction t1, t2;
-		if(query.startsWith("SELECT")){
-			t1 = new Transaction2(query, scope, lockIdentifier);
-			t1.setIsolationLevel(iso_level);
-			
-			if(scope.equals("PALAWAN")){
-				readPalawan((Transaction2)t1);
-			}
-			else if(scope.equals("MARINDUQUE")){
-				readMarinduque((Transaction2)t1);
+			Transaction t1, t2;
+			Thread x, x2;
+			if(isGlobal){
+				if(query.startsWith("SELECT")){
+					t1 = new Transaction2(query, scope);
+					t1.setIsolationLevel(iso_level);
+					x = new Thread((Transaction2)t1);
+					
+				}else{
+					t1 = new Transaction1(query, scope);
+					t1.setIsolationLevel(iso_level);
+					x = new Thread((Transaction1)t1);
+				}
+				if(query2.startsWith("SELECT")){
+					t2 = new Transaction2(query2, scope2);
+					t2.setIsolationLevel(iso_level);
+					x2 = new Thread((Transaction2)t2);
+				}else{
+					t2 = new Transaction1(query2, scope2);
+					t2.setIsolationLevel(iso_level);
+					x2 = new Thread((Transaction1)t2);
+				}
+				x.start();
+				x2.start();
+				while(true){
+					if(t1.isDonePopulating() && t2.isDonePopulating()){
+						break;
+					}
+				}
+				Driver.printResultSet(t1.getResultSet());
+				Driver.printResultSet(t2.getResultSet());
+				
 			}
 			else{
-				readBoth((Transaction2)t1);
+				if(query.startsWith("SELECT")){
+					t1 = new Transaction2(query, scope);
+					t1.setIsolationLevel(iso_level);
+					
+					if(scope.equals("PALAWAN")){
+						readPalawan((Transaction2)t1);
+					}
+					else if(scope.equals("MARINDUQUE")){
+						readMarinduque((Transaction2)t1);
+					}
+					else{
+						readBoth((Transaction2)t1);
+					}
+				}else{//if t1 is write
+					t1 = new Transaction1(query, scope);
+					t1.setIsolationLevel(iso_level);
+					
+					if(scope.equals("PALAWAN")){
+						writePalawan(t1);
+					}
+					else if(scope.equals("MARINDUQUE")){
+						writeMarinduque(t1);
+					}
+					else{
+						writeBoth(t1);
+					}
+				}
+				
+				if(query2.startsWith("SELECT")){//if t2 is read
+					t2 = new Transaction2(query2, scope2);
+					t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
+					
+					if(scope2.equals("PALAWAN")){
+						readPalawan((Transaction2)t2);
+					}
+					else if(scope2.equals("MARINDUQUE")){
+						readMarinduque((Transaction2)t2);
+					}
+					else {
+						readBoth((Transaction2)t2);
+					}
+				}else{//if t2 is write
+					t2 = new Transaction1(query2, scope2);
+					t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
+					
+					if(scope2.equals("PALAWAN")){
+						writePalawan(t2);
+					}
+					else if(scope2.equals("MARINDUQUE")){
+						writeMarinduque(t2);
+					}
+					else {
+						writeBoth(t2);
+					}
+				}
 			}
-		}else{//if t1 is write
-			t1 = new Transaction1(query, scope, lockIdentifier);
-			t1.setIsolationLevel(iso_level);
-			
-			if(scope.equals("PALAWAN")){
-				writePalawan(t1);
-			}
-			else if(scope.equals("MARINDUQUE")){
-				writeMarinduque(t1);
-			}
-			else{
-				writeBoth(t1);
-			}
-		}
-		
-		if(query2.startsWith("SELECT")){//if t2 is read
-			t2 = new Transaction2(query2, scope2, lockIdentifier2);
-			t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-			
-			if(scope2.equals("PALAWAN")){
-				readPalawan((Transaction2)t2);
-			}
-			else if(scope2.equals("MARINDUQUE")){
-				readMarinduque((Transaction2)t2);
-			}
-			else {
-				readBoth((Transaction2)t2);
-			}
-		}else{//if t2 is write
-			t2 = new Transaction1(query2, scope2, lockIdentifier2);
-			t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-			
-			if(scope2.equals("PALAWAN")){
-				writePalawan(t2);
-			}
-			else if(scope2.equals("MARINDUQUE")){
-				writeMarinduque(t2);
-			}
-			else {
-				writeBoth(t2);
-			}
-		}
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
@@ -171,25 +212,29 @@ public class Controller {
 	
 	public void readPalawan(Transaction2 t)throws SQLException{
 		if(name.equalsIgnoreCase("PALAWAN")){
-			t.beginTransaction();
-			t.start();
-			
+			Thread x = new Thread(t);
+			x.start();
+			while(true){
+				if(t.isDonePopulating())
+					break;
+			}
 			Driver.printResultSet(t.getResultSet());
-				//execute from self
 		}
 		else if(name.equalsIgnoreCase("CENTRAL")){
-			t.beginTransaction();
-			t.start();
-			
+			Thread x = new Thread(t);
+			x.start();
+			while(true){
+				if(t.isDonePopulating())
+					break;
+			}
 			Driver.printResultSet(t.getResultSet());
-			//return result to driver
 		}
 		else if(name.equalsIgnoreCase("MARINDUQUE")){
 			if(myClient.checkCentralIfExists()){
 				try{
 					String message = "\"READREQUEST\" ";
 					byte[] prefix = message.getBytes();
-					SerializableTrans st = new SerializableTrans(t.getQuery(), t.getLockIdentifier());
+					SerializableTrans st = new SerializableTrans(t.getQuery());
 					byte[] trans = serialize(st);
 					byte[] fin = byteConcat(prefix,trans);
 					myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -204,15 +249,21 @@ public class Controller {
 	
 	public void readMarinduque(Transaction2 t) throws SQLException{
 		if(name.equalsIgnoreCase("MARINDUQUE")){
-			t.beginTransaction();
-			t.start();
-			
+			Thread x = new Thread(t);
+			x.start();
+			while(true){
+				if(t.isDonePopulating())
+					break;
+			}
 			Driver.printResultSet(t.getResultSet());
 		}
 		else if(name.equalsIgnoreCase("CENTRAL")){
-			t.beginTransaction();
-			t.start();
-			
+			Thread x = new Thread(t);
+			x.start();
+			while(true){
+				if(t.isDonePopulating())
+					break;
+			}
 			Driver.printResultSet(t.getResultSet());
 		}
 		
@@ -221,7 +272,7 @@ public class Controller {
 				try{
 					String message = "\"READREQUEST\" ";
 					byte[] prefix = message.getBytes();
-					SerializableTrans st = new SerializableTrans(t.getQuery(), t.getLockIdentifier());
+					SerializableTrans st = new SerializableTrans(t.getQuery());
 					byte[] trans = serialize(st);
 					byte[] fin = byteConcat(prefix,trans);
 					myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -238,8 +289,12 @@ public class Controller {
 	
 	public void readBoth(Transaction2 t)throws SQLException{
 		if(name.equalsIgnoreCase("CENTRAL")){
-			t.beginTransaction();
-			t.start();
+			Thread x = new Thread(t);
+			x.start();
+			while(true){
+				if(t.isDonePopulating())
+					break;
+			}
 			Driver.printResultSet(t.getResultSet());
 		}else{
 			if(myClient.checkCentralIfExists()){
@@ -247,15 +302,56 @@ public class Controller {
 					Driver.printMessage("CENTRAL EXISTS");
 					String message = "\"READREQUEST\" ";
 					byte[] prefix = message.getBytes();
-					SerializableTrans st = new SerializableTrans(t.getQuery(),t.getLockIdentifier());
+					SerializableTrans st = new SerializableTrans(t.getQuery());
 					byte[] trans = serialize(st);
 					byte[] fin = byteConcat(prefix,trans);
 					myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
 				}catch(IOException e){
 					e.printStackTrace();
 				}
-			}else{
-				Driver.printMessage("A NEEDED SERVER IS DOWN");
+			}
+			else{
+				if(name.equalsIgnoreCase("MARINDUQUE")){
+					if(myClient.checkPalawanIfExists()){
+						try{
+							t.beginTransaction();
+							t.start();
+							cs = t.getResultSet();
+							
+							Driver.printMessage("CENTRAL EXISTS");
+							String message = "\"READREQUESTCOMBINE\" ";
+							byte[] prefix = message.getBytes();
+							SerializableTrans st = new SerializableTrans(t.getQuery());
+							byte[] trans = serialize(st);
+							byte[] fin = byteConcat(prefix,trans);
+							myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
+						}catch(IOException e){
+							e.printStackTrace();
+						}
+					}else{
+						Driver.printMessage("A NEEDED SERVER IS DOWN");
+					}
+				}else{
+					if(myClient.checkMarinduqueIfExists()){
+						try{
+							t.beginTransaction();
+							t.start();
+							cs = t.getResultSet();
+							
+							Driver.printMessage("CENTRAL EXISTS");
+							String message = "\"READREQUESTCOMBINE\" ";
+							byte[] prefix = message.getBytes();
+							SerializableTrans st = new SerializableTrans(t.getQuery());
+							byte[] trans = serialize(st);
+							byte[] fin = byteConcat(prefix,trans);
+							myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
+						}catch(IOException e){
+							e.printStackTrace();
+						}
+					}else{
+						Driver.printMessage("A NEEDED SERVER IS DOWN");
+					}
+				}
 			}
 		}
 	}
@@ -329,5 +425,20 @@ public class Controller {
 	public void printResultSet(CachedRowSetImpl rs){
 		Driver.printResultSet(rs);
 	}
+	
+	public void printCombinedResultSet(CachedRowSetImpl rs2){
+		Driver.printResultSet(cs);
+		cs = null;
+		Driver.printResultSet(rs2);
+	}
+
+	public CachedRowSetImpl getCs() {
+		return cs;
+	}
+
+	public void setCs(CachedRowSetImpl cs) {
+		this.cs = cs;
+	}
+	
 	
 }

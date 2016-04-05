@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 import controller.Controller;
 
 public class Client implements Runnable{
-    int port = 1212;
+    int port = 1313;
     ArrayList<InetAddress> hosts;
     ArrayList<String> names;
     PrintWriter OUT;
@@ -34,12 +34,14 @@ public class Client implements Runnable{
         
         
         try {
-			hosts.add(InetAddress.getByName("192.168.1.4"));
+			hosts.add(InetAddress.getByName("192.168.1.148"));
+			hosts.add(InetAddress.getByName("192.168.1.118"));
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         //hosts.add(InetAddress.getByName("ip"));
+        names.add("MARINDUQUE");
         names.add("CENTRAL");
         //names.add("PALAWAN");
         
@@ -90,6 +92,7 @@ public class Client implements Runnable{
     public boolean checkMarinduqueIfExists(){
     	try{
     		Socket s = new Socket(hosts.get(names.indexOf("MARINDUQUE")), port);
+    		s.close();
     	}catch(IOException e){
     		e.printStackTrace();
     		return false;
@@ -111,7 +114,7 @@ public class Client implements Runnable{
     public boolean checkPalawanIfExists(){
     	try{
     		Socket s = new Socket(hosts.get(names.indexOf("PALAWAN")), port);
-    		
+    		s.close();
     	}catch(IOException e){
     		e.printStackTrace();
     		return false;

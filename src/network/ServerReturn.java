@@ -46,7 +46,7 @@ public class ServerReturn{
 	        	if(messageType.contains("\"READREQUEST\"")){
 	        		parent.printMessage("IN READREQUEST");
 	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
-	        		Transaction2 t = new Transaction2(st.getQuery(),"",st.getLockIdentifier());
+	        		Transaction2 t = new Transaction2(st.getQuery(),"");
 	            	t.beginTransaction();
 	            	t.start();
 	            	DatabaseObject dbo = new DatabaseObject(t.getResultSet());
@@ -61,7 +61,23 @@ public class ServerReturn{
 	        		DatabaseObject dbo = (DatabaseObject)deserialize(mybytearray);
 	        		CachedRowSetImpl rs = dbo.getResultSet();
 	        		parent.printResultSet(rs);
-	        			
+	        	}else if(messageType.contains("\"READREQUESTCOMBINE\"")){
+	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
+	        		Transaction2 t = new Transaction2(st.getQuery(),"");
+	            	t.beginTransaction();
+	            	t.start();
+	            	DatabaseObject dbo = new DatabaseObject(t.getResultSet());
+	            	String first="\"RETURNREADREQUESTCOMBINE\" ";
+	            	byte[] prefix = first.getBytes();
+	            	byte[] dboBytes = serialize(dbo);
+	            	byte[] finalByte = byteConcat(prefix, dboBytes);
+	            	parent.printMessage("ADDRESS IN RETURN REQUEST: "+X.getInetAddress());
+	            	parent.sendToHost(finalByte, X.getInetAddress());
+	        	}else if(messageType.contains("\"RETURNREADREQUESTCOMBINE\"")){
+	        		DatabaseObject dbo = (DatabaseObject)deserialize(mybytearray);
+	        		CachedRowSetImpl rs = dbo.getResultSet();
+	        		parent.printCombinedResultSet(rs);
+	        		
 	        	}
 	        	X.close();
     		}catch(Exception e){

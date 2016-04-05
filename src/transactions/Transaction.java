@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
+import com.sun.rowset.CachedRowSetImpl;
+
 public interface Transaction {
 	
 	public static int ISO_READ_UNCOMMITTED = 1;
@@ -17,9 +19,9 @@ public interface Transaction {
 	
 	public void beginTransaction() throws SQLException;
 	
-	public ResultSet getResultSet();
+	public CachedRowSetImpl getResultSet();
 	
-	public int getLockIdentifier() ;
+	public boolean isDonePopulating();
 	
 	public String getQuery() ;
 	

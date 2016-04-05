@@ -9,11 +9,12 @@ import com.sun.rowset.CachedRowSetImpl;
 import controller.Controller;
 
 public class Driver {
-	static final int PORT=1212;
+	static final int PORT=1414;
 	
 	public static void main(String[] args){
 		Controller runner = new Controller();
-		runner.setName("CENTRAL");
+		boolean isLocal = true;
+		runner.setName("PALAWAN");
 		runner.startServer(PORT);
 		runner.startClient();
 		Scanner sc = new Scanner(System.in);
@@ -23,9 +24,15 @@ public class Driver {
 			do{
 				System.out.println("Menu:");
 				System.out.println("[1] Read read transaction");
+				System.out.println("[2] Set to global");
+				System.out.println("[3] Set to local");
 				condition = sc.nextInt();
 				if(condition==1){
-					runner.executeTransactions("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage>94;", "BOTH", 0, "SELECT hpq_hh_id, id FROM hpq_crop WHERE crop_line=3;", "BOTH", 1);
+					runner.executeTransactions("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage>94;", "BOTH", "SELECT hpq_hh_id FROM hpq_death WHERE mdeadage=94;", "BOTH", isLocal);
+				}else if(condition==2){
+					isLocal = true;
+				}else if(condition==3){
+					isLocal = false;
 				}
 			}while(condition != -1);
 		}catch(Exception e){

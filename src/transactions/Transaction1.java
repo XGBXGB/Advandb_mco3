@@ -13,18 +13,18 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 public class Transaction1 implements Transaction, Runnable, Serializable{
-	int lockIdentifier;
 	String scope;
 	String query;
 	Connection con;
 	Statement stmt;
 	CachedRowSetImpl cs;
+	boolean isDonePopulating;
 	
-	public Transaction1(String query, String scope, int lockIdentifier){
-		this.lockIdentifier = lockIdentifier;
+	public Transaction1(String query, String scope){
 		this.query = query;
 		this.scope = scope;
 		con = DBConnect.getConnection();
+		isDonePopulating = false;
 	}
 	
 	@Override
@@ -100,17 +100,14 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 	public void start() {
 		try{
 			String lock="";
-			if(lockIdentifier%2==0)
-				lock = "LOCK TABLES hpq_death WRITE;";
-			else
-				lock = "LOCK TABLES hpq_crop WRITE;";
+			lock = "LOCK TABLES hpq_death WRITE;";
 			
 			stmt.execute(lock);
 			String SQL = query;
 			stmt.executeUpdate(SQL);
 			String unlock = "UNLOCK TABLES;";
 			stmt.execute(unlock);
-			
+			isDonePopulating = true;
 			con.commit();
 		}catch(SQLException e){
 			e.printStackTrace();
@@ -118,16 +115,17 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 		
 	}
 	
-	public ResultSet getResultSet(){
+	public CachedRowSetImpl getResultSet(){
 		return null;
 	}
 
-	public int getLockIdentifier() {
-		return lockIdentifier;
-	}
 
 	public String getQuery() {
 		return query;
+	}
+	
+	public boolean isDonePopulating(){
+		return isDonePopulating;
 	}
 
 }

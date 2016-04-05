@@ -12,28 +12,24 @@ import com.sun.rowset.CachedRowSetImpl;
 
 import database.DBConnect;
 
-public class Transaction2 implements Transaction, Serializable{
-	int lockIdentifier;
+public class Transaction2 implements Transaction, Serializable, Runnable{
 	String scope;
 	String query;
 	Connection con;
 	Statement stmt;
 	CachedRowSetImpl cs;
+	boolean donePopulating;
 	
-	public Transaction2(String query, String scope, int lockIdentifier){
-		this.lockIdentifier = lockIdentifier;
+	public Transaction2(String query, String scope){
 		this.scope = scope;
 		cs = null;
 		this.query = query;
 		con = DBConnect.getConnection();
+		donePopulating = false;
 	}
 	
 	
 	
-	public int getLockIdentifier() {
-		return lockIdentifier;
-	}
-
 
 
 	public String getQuery() {
@@ -104,11 +100,7 @@ public class Transaction2 implements Transaction, Serializable{
 		//QUERY CODE BLOCK
 		try{
 			String lock="";
-			if(lockIdentifier%2==0)
-				lock = "LOCK TABLES hpq_death READ;";
-			else
-				lock = "LOCK TABLES hpq_crop READ;";
-			
+			lock = "LOCK TABLES hpq_death READ;";
 			stmt.execute(lock);
 			ResultSet rs = stmt.executeQuery(query);
 			cs = new CachedRowSetImpl();
@@ -116,8 +108,25 @@ public class Transaction2 implements Transaction, Serializable{
 			String unlock = "UNLOCK TABLES;";
 			Statement stmt2 = con.createStatement();
 			stmt2.execute(unlock);
+			donePopulating = true;
 			System.out.println("DONE EXECUTING TRANS2 "+query);
 		}catch(SQLException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean isDonePopulating(){
+		return donePopulating;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			beginTransaction();
+			start();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
