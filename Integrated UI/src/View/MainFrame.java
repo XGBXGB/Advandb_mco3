@@ -44,7 +44,6 @@ public class MainFrame extends JFrame{
 	private JTextArea logger;
 	
 	public MainFrame(Controller c) {
-		
 		try
 		{
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
@@ -72,11 +71,11 @@ public class MainFrame extends JFrame{
 		this.setSize(900, 650);
 		setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
 		this.setTitle("ADVANDB MCO3 - ");
-		this.setLayout(new BorderLayout());
+		getContentPane().setLayout(new BorderLayout());
 		
-		this.add(addTransactionsControl(), BorderLayout.NORTH);
-		this.add(addTransactionsHolder(), BorderLayout.CENTER);
-		this.add(addLogHolder(), BorderLayout.SOUTH);
+		getContentPane().add(addTransactionsControl(), BorderLayout.NORTH);
+		getContentPane().add(addTransactionsHolder(), BorderLayout.CENTER);
+		getContentPane().add(addLogHolder(), BorderLayout.SOUTH);
 		this.setVisible(true);
 	}
 	
@@ -173,7 +172,7 @@ public class MainFrame extends JFrame{
 		transactionsHolder.repaint();
 		
 		transactionList.add(panel);
-		tabbedPane.addTab(name, panel );
+		tabbedPane.addTab(name, panel);
 		tabbedPane.revalidate();
 		tabbedPane.repaint();
 	}
@@ -211,6 +210,7 @@ public class MainFrame extends JFrame{
 		}
 		else {
 			// send needed info to controller
+			
 		}
 	}
 	
@@ -230,7 +230,11 @@ public class MainFrame extends JFrame{
 	}
 	
 	public void updateTable( String tableName, ResultSet rs){
-		
+		for(int i = 0; i < transactionList.size(); i++) {
+			if(tableName.equals(transactionList.get(i).getName())) {
+				transactionList.get(i).updateTable(rs);
+			}
+		}
 	}
 	
 	public void log (String message) {
@@ -249,6 +253,7 @@ public class MainFrame extends JFrame{
 	    	}
 	    	else if (button == runBtn){
 	    		runTransactions();
+	    		
 	    	}
 	    	else {
 	    		
