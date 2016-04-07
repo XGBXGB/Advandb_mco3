@@ -427,8 +427,7 @@ public class TransactionPanel extends JPanel{
 		String query = getQuery();
 		Transaction transaction = null;
 		if (query.contains("UPDATE") || query.contains("DELETE")){
-			transaction = new Transaction1(query, getArea() );
-			// abort?
+			transaction = new Transaction1(query, getArea(), getBooleanAbort());
 		}
 		else if (query.contains("SELECT")){
 			transaction = new Transaction2(query, getArea() );

@@ -87,7 +87,7 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	@Override
 	public void commit() {
 		try{
-			con.rollback();
+			con.commit();
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -109,7 +109,6 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 			Statement stmt2 = con.createStatement();
 			stmt2.execute(unlock);
 			donePopulating = true;
-			System.out.println("DONE EXECUTING TRANS2 "+query);
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
@@ -137,6 +136,16 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	
 	public CachedRowSetImpl getResultSet(){
 		return cs;
+	}
+
+
+
+
+
+	@Override
+	public String getScope() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

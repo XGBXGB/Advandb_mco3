@@ -18,6 +18,7 @@ import java.util.Scanner;
 import com.sun.rowset.CachedRowSetImpl;
 
 import Controller.Controller;
+import Transaction.Transaction1;
 import Transaction.Transaction2;
 
 public class ServerReturn{
@@ -78,6 +79,125 @@ public class ServerReturn{
 	        		CachedRowSetImpl rs = dbo.getResultSet();
 	        		parent.printCombinedResultSet(rs);
 	        		
+	        	/*}else if(messageType.contains("\"WRITEREQUEST\"")){
+	        		parent.printMessage("IN WRITEREQUEST");
+	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
+	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit());
+	            	t.beginTransaction();
+	            	t.start();
+	            	t.end();
+	            	
+	            	if(t.getScope().equalsIgnoreCase("BOTH")){
+	            		String first = "\"OKAYCOMMIT\" ";
+            			parent.sendToHost(first.getBytes(), X.getInetAddress());
+	            		if(parent.isAddressOf("PALAWAN", X.getInetAddress())){
+	            			String message = "\"ORDERWRITE\" ";
+                            byte[] prefix = message.getBytes();
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            byte[] trans = serialize(sertrans);
+                            byte[] fin = byteConcat(prefix, trans);
+                            parent.sendToHost(fin, parent.getAddressOf("MARINDUQUE"));
+	            		}else if(parent.isAddressOf("MARINDUQUE", X.getInetAddress())){
+	            			String message = "\"ORDERWRITE\" ";
+                            byte[] prefix = message.getBytes();
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            byte[] trans = serialize(sertrans);
+                            byte[] fin = byteConcat(prefix, trans);
+                            parent.sendToHost(fin, parent.getAddressOf("PALAWAN"));
+	            		}
+	            	}else if(t.getScope().equalsIgnoreCase("PALAWAN")){
+	            		if(parent.isAddressOf("PALAWAN", X.getInetAddress())){
+	            			String first = "\"OKAYCOMMIT\" ";
+	            			parent.sendToHost(first.getBytes(), X.getInetAddress());
+	            		}else{
+	            			String message = "\"ORDERWRITE\" ";
+                            byte[] prefix = message.getBytes();
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            byte[] trans = serialize(sertrans);
+                            byte[] fin = byteConcat(prefix, trans);
+                            parent.sendToHost(fin, parent.getAddressOf("PALAWAN"));
+	            		}
+	            	}else{
+	            		if(parent.isAddressOf("MARINDUQUE", X.getInetAddress())){
+	            			String first = "\"OKAYCOMMIT\" ";
+	            			parent.sendToHost(first.getBytes(), X.getInetAddress());
+	            		}else{
+	            			String message = "\"ORDERWRITE\" ";
+                            byte[] prefix = message.getBytes();
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            byte[] trans = serialize(sertrans);
+                            byte[] fin = byteConcat(prefix, trans);
+                            parent.sendToHost(fin, parent.getAddressOf("MARINDUQUE"));
+	            		}
+	            	}*/
+	        	/*}else if(messageType.contains("\"OKAYCOMMIT\"")){
+	        		parent.commitPendingWrite();
+	        	}else if(messageType.contains("\"ORDERWRITE\"")){
+	        		SerializableTrans writetrans = (SerializableTrans) deserialize(mybytearray);
+	        		Transaction1 t = new Transaction1(writetrans.getQuery(),writetrans.getScope(), writetrans.isToCommit());
+	            	t.beginTransaction();
+	            	t.start();
+	            	t.end();*/
+	        	}else if(messageType.contains("\"WRITEREQUEST\"")){
+	        		parent.printMessage("IN WRITEREQUEST");
+	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
+	        		System.out.println("SCOPPEEEE: "+st.getScope());
+	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit());
+	            	parent.partialCommit(t);
+	            	
+	            	if(t.getScope().equalsIgnoreCase("PALAWAN")){
+	            		if(parent.isAddressOf("PALAWAN", X.getInetAddress())){
+	            			String msg = "\"GOCOMMIT\" ";
+	    	            	SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+	    	            	byte[] prefix = msg.getBytes();
+	                        byte[] trans = serialize(sertrans);
+	                        byte[] fin = byteConcat(prefix, trans);
+	    	            	parent.sendToHost(fin, X.getInetAddress());
+	            		}else{
+	            			String message = "\"ORDERWRITE\" ";
+                            byte[] prefix = message.getBytes();
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            byte[] trans = serialize(sertrans);
+                            byte[] fin = byteConcat(prefix, trans);
+                            parent.sendToHost(fin, parent.getAddressOf("PALAWAN"));
+	            		}
+	            	}else if(t.getScope().equalsIgnoreCase("MARINDUQUE")){
+	            		if(parent.isAddressOf("MARINDUQUE", X.getInetAddress())){
+	            			String msg = "\"GOCOMMIT\" ";
+	    	            	SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+	    	            	byte[] prefix = msg.getBytes();
+	                        byte[] trans = serialize(sertrans);
+	                        byte[] fin = byteConcat(prefix, trans);
+	    	            	parent.sendToHost(fin, X.getInetAddress());
+	            		}else{
+	            			String message = "\"ORDERWRITE\" ";
+                            byte[] prefix = message.getBytes();
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            byte[] trans = serialize(sertrans);
+                            byte[] fin = byteConcat(prefix, trans);
+                            parent.sendToHost(fin, parent.getAddressOf("MARINDUQUE"));
+	            		}
+	            	}
+	        	}else if(messageType.contains("\"GOCOMMIT\"")){
+	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
+	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit());
+	            	t.beginTransaction();
+	            	t.start();
+	            	t.end();
+	        		String msg = "\"DONECOMMIT\" ";
+	        		parent.sendToHost(msg.getBytes(), X.getInetAddress());
+	        	}else if(messageType.contains("\"ORDERWRITE\"")){
+	        		SerializableTrans writetrans = (SerializableTrans) deserialize(mybytearray);
+	        		Transaction1 t = new Transaction1(writetrans.getQuery(),writetrans.getScope(), writetrans.isToCommit());
+	            	t.beginTransaction();
+	            	t.start();
+	            	t.end();
+	            	
+	            	String msg = "\"DONEWRITING\" ";
+	        		parent.sendToHost(msg.getBytes(), X.getInetAddress());
+	        	}else if(messageType.contains("\"DONECOMMIT\"") || messageType.contains("\"DONEWRITING\"")){
+	        		System.out.println("WENTHERE");
+	        		parent.commitPendingWrite();
 	        	}
 	        	X.close();
     		}catch(Exception e){

@@ -18,13 +18,15 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 	Connection con;
 	Statement stmt;
 	CachedRowSetImpl cs;
+	boolean toCommit;
 	boolean isDonePopulating;
 	
-	public Transaction1(String query, String scope){
+	public Transaction1(String query, String scope, boolean toCommit){
 		this.query = query;
 		this.scope = scope;
 		con = DBConnect.getConnection();
 		isDonePopulating = false;
+		this.toCommit = toCommit;
 	}
 	
 	@Override
@@ -73,11 +75,23 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 		}
 		
 	}
+	
+	public void end() {
+		try{
+			if(toCommit)
+				con.commit();
+			else
+				con.rollback();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+	}
 
 	@Override
 	public void commit() {
 		try{
-			con.rollback();
+			con.commit();
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -108,7 +122,7 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 			String unlock = "UNLOCK TABLES;";
 			stmt.execute(unlock);
 			isDonePopulating = true;
-			con.commit();
+			
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
@@ -128,4 +142,15 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 		return isDonePopulating;
 	}
 
+	@Override
+	public String getScope() {
+		// TODO Auto-generated method stub
+		return scope;
+	}
+
+	public boolean isToCommit() {
+		return toCommit;
+	}
+
+	
 }

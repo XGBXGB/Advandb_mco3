@@ -1,10 +1,24 @@
 package Controller;
+
+import com.sun.rowset.CachedRowSetImpl;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+
+import javax.swing.JOptionPane;
 
 import Network.Client;
 import Network.SerializableTrans;
@@ -13,180 +27,98 @@ import Transaction.Transaction;
 import Transaction.Transaction1;
 import Transaction.Transaction2;
 import View.MainFrame;
-
-import com.sun.rowset.CachedRowSetImpl;
+import Controller.Driver;
 
 public class Controller {
-	
-	private int iso_level = 1;
+
+    private int iso_level = 1;
     private Client myClient;
     private Server myServer;
     private CachedRowSetImpl cs;
     private String name = "";
     private ArrayList<Transaction> transactions;
     private ArrayList<String> queries, scopes;
+    Transaction1 pendingWrite;
     Thread client, server;
-	
-	private MainFrame mainFrame;
-//	QueryFactory queryFactory;
+    
 
-	public Controller(){
-		//queryFactory = new QueryFactory();
-		transactions = new ArrayList();
+    public Controller() {
+    	new MainFrame(this);
+        transactions = new ArrayList();
         myClient = null;
         myServer = null;
+        pendingWrite = null;
         cs = null;
-		mainFrame = new MainFrame(this);
-	}
-	
-	public void getResult(ArrayList<String> upperChoices, ArrayList<String> lowerChoices){
-//		mainFrame.updateTable(queryFactory.getQuery(upperChoices, lowerChoices));
-	}
-	
-    public void executeTransactions(String query, String scope, String query2, String scope2, boolean isGlobal) {
+    }
+
+    public void executeTransactions(ArrayList<Transaction> transactionsList) {
+
         try {
-            Transaction t1, t2;
-            Thread x, x2;
-            queries = new ArrayList();
-            scopes = new ArrayList();
-            /*if (isGlobal) {
-             if (query.startsWith("SELECT")) {
-             t1 = new Transaction2(query, scope);
-             t1.setIsolationLevel(iso_level);
-             x = new Thread((Transaction2) t1);
-
-             } else {
-             t1 = new Transaction1(query, scope);
-             t1.setIsolationLevel(iso_level);
-             x = new Thread((Transaction1) t1);
-             }
-             if (query2.startsWith("SELECT")) {
-             t2 = new Transaction2(query2, scope2);
-             t2.setIsolationLevel(iso_level);
-             x2 = new Thread((Transaction2) t2);
-             } else {
-             t2 = new Transaction1(query2, scope2);
-             t2.setIsolationLevel(iso_level);
-             x2 = new Thread((Transaction1) t2);
-             }
-             x.start();
-             x2.start();
-             while (true) {
-             if (t1.isDonePopulating() && t2.isDonePopulating()) {
-             break;
-             }
-             }
-             Driver.printResultSet(t1.getResultSet());
-             Driver.printResultSet(t2.getResultSet());
-
-             }*/ //else {
-            queries.add("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage>94;");
-            scopes.add("PALAWAN");
-            queries.add("SELECT hpq_hh_id FROM hpq_death WHERE mdeadage=94;");
-            scopes.add("PALAWAN");
-            Transaction trans;
-            for(int i=0; i<queries.size() && i<scopes.size(); i++){
-            	if (queries.get(i).startsWith("SELECT")) {
-                    if (scopes.get(i).equals("PALAWAN")) {
-                    	trans = new Transaction2(queries.get(i), scopes.get(i));
-                        trans.setIsolationLevel(iso_level);
-                        readPalawan((Transaction2) trans);
-                    } else if (scopes.get(i).equals("MARINDUQUE")) {
-                    	trans = new Transaction2(queries.get(i), scopes.get(i));
-                        trans.setIsolationLevel(iso_level);
-                        readMarinduque((Transaction2) trans);
-                    } else {
-                    	trans = new Transaction2(queries.get(i), scopes.get(i));
-                        trans.setIsolationLevel(iso_level);
-                        readBoth((Transaction2) trans);
-                    }
-                } else {//if t1 is write
-                    if (scopes.get(i).equals("PALAWAN")) {
-                    	trans = new Transaction1(queries.get(i), scopes.get(i));
-                        trans.setIsolationLevel(iso_level);
-                        writePalawan(trans);
-                    } else if (scope.equals("MARINDUQUE")) {
-                    	trans = new Transaction1(queries.get(i), scopes.get(i));
-                        trans.setIsolationLevel(iso_level);
-                        writeMarinduque(trans);
-                    } else {
-                    	trans = new Transaction1(queries.get(i), scopes.get(i));
-                        trans.setIsolationLevel(iso_level);
-                        writeBoth(trans);
-                    }
-                }
-            }
-
-            /*for (int i = 0; i < transactions.size(); i++) {
-            	
-                for (int j = 0; j < queries.size() && j < scopes.size(); j++) {
-                	
-                    if (queries.get(j).equals("SELECT")) {
-                        if (scopes.get(j).equals("PALAWAN")) {
-                            readPalawan((Transaction2) transactions.get(i));
-                        } else if (scopes.get(j).equals("MARINDUQUE")) {
-                            readMarinduque((Transaction2) transactions.get(i));
-                        } else {
-                            readBoth((Transaction2) transactions.get(i));
-                        }
-                    } else {//if t1 is write
-                        if (scope.equals("PALAWAN")) {
-                            writePalawan(t1);
-                        } else if (scope.equals("MARINDUQUE")) {
-                            writeMarinduque(t1);
-                        } else {
-                            writeBoth(t1);
-                        }
-                    }
-                }
-            }*/
-
-            /* if (query2.startsWith("SELECT")) {//if t2 is read
-             t2 = new Transaction2(query2, scope2);
-             t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-
-             if (scope2.equals("PALAWAN")) {
-             readPalawan((Transaction2) t2);
-             } else if (scope2.equals("MARINDUQUE")) {
-             readMarinduque((Transaction2) t2);
-             } else {
-             readBoth((Transaction2) t2);
-             }
-             } else {//if t2 is write
-             t2 = new Transaction1(query2, scope2);
-             t2.setIsolationLevel(Transaction.ISO_READ_UNCOMMITTED);
-
-             if (scope2.equals("PALAWAN")) {
-             writePalawan(t2);
-             } else if (scope2.equals("MARINDUQUE")) {
-             writeMarinduque(t2);
-             } else {
-             writeBoth(t2);
-             }
-             }*/
-            //    }
+        	for (Transaction transaction : transactionsList){
+        		if (transaction instanceof Transaction2) {
+        			switch(transaction.getScope()){
+        				case "MARIDUQUE": readMarinduque((Transaction2)transaction); break; 
+        				case "PALAWAN": readPalawan((Transaction2)transaction); break;
+        				case "BOTH": readBoth((Transaction2)transaction); break;
+        			}
+        		}
+        		else if (transaction instanceof Transaction1) {
+	        			switch(transaction.getScope()){
+	    				case "MARIDUQUE": writeMarinduque((Transaction1)transaction); break; 
+	    				case "PALAWAN": writePalawan((Transaction1)transaction); break;
+	    				case "BOTH": writeBoth((Transaction1)transaction); break;
+	    			}
+	    		}
+        	}
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
     }
-
+    
     public void writePalawan(Transaction t) {
         if (name.equalsIgnoreCase("CENTRAL")) {
             if (myClient.checkPalawanIfExists()) {
-                //return true;
+            	try {
+            		String message = "\"ORDERWRITE\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(sertrans);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
             } else {
                 //return false;
             }
         } else if (name.equalsIgnoreCase("PALAWAN")) {
             if (myClient.checkCentralIfExists()) {
-                //return true;
+            	try {
+                    String message = "\"WRITEREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
             } else {
                 //return false;
             }
         } else if (name.equalsIgnoreCase("MARINDUQUE")) {
             if (myClient.checkCentralIfExists() && myClient.checkPalawanIfExists()) {
-                //return true;
+            	try {
+                    String message = "\"WRITEREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
             } else {
                 //return false;
             }
@@ -196,19 +128,47 @@ public class Controller {
     public void writeMarinduque(Transaction t) {
         if (name.equalsIgnoreCase("CENTRAL")) {
             if (myClient.checkMarinduqueIfExists()) {
-                //return true;
+            	try {
+            		partialCommit(t);
+            		String message = "\"ORDERWRITE\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(sertrans);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
             } else {
                 //return false;
             }
         } else if (name.equalsIgnoreCase("MARINDUQUE")) {
             if (myClient.checkCentralIfExists()) {
-                //return true;
+            	try {
+                    String message = "\"WRITEREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
             } else {
                 //return false;
             }
         } else if (name.equalsIgnoreCase("PALAWAN")) {
             if (myClient.checkCentralIfExists() && myClient.checkMarinduqueIfExists()) {
-                //return true;
+            	try {
+                    String message = "\"WRITEREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
             } else {
                 //return false;
             }
@@ -216,15 +176,45 @@ public class Controller {
     }
 
     public void writeBoth(Transaction t) {
-        if (name.equalsIgnoreCase("CENTRAL")) {
+        if (name.equalsIgnoreCase("CENTRAL")) { //jake seo
             if (myClient.checkMarinduqueIfExists() && myClient.checkPalawanIfExists()) {
-                //return true;
+            	try {
+            		pendingWrite = (Transaction1) t;
+            		pendingWrite.beginTransaction();
+            		pendingWrite.start();
+                    String message = "\"WRITEREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
+                    myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (SQLException e){
+                	e.printStackTrace();
+                }
             } else {
                 //return false;
             }
         } else if (name.equalsIgnoreCase("MARINDUQUE")) {
             if (myClient.checkCentralIfExists() && myClient.checkPalawanIfExists()) {
-                //return true;
+            	try {
+            		pendingWrite = (Transaction1) t;
+            		pendingWrite.beginTransaction();
+            		pendingWrite.start();
+                    String message = "\"WRITEREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
+                    myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (SQLException e){
+                	e.printStackTrace();
+                }
             } else {
                 //return false;
             }
@@ -261,15 +251,27 @@ public class Controller {
                 try {
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
-                Driver.printMessage("A NEEDED SERVER IS DOWN");
+            } else if (myClient.checkPalawanIfExists()){
+            	try {
+                    String message = "\"READREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else{
+            	Driver.printMessage("A NEEDED SERVER IS DOWN");
             }
         }
     }
@@ -298,7 +300,7 @@ public class Controller {
                 try {
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -306,7 +308,20 @@ public class Controller {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
+            }else if (myClient.checkMarinduqueIfExists()) { 
+            	try {
+                    String message = "\"READREQUEST\" ";
+                    byte[] prefix = message.getBytes();
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    byte[] trans = serialize(st);
+                    byte[] fin = byteConcat(prefix, trans);
+                    myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
                 Driver.printMessage("A NEEDED SERVER IS DOWN");
             }
         }
@@ -328,7 +343,7 @@ public class Controller {
                     Driver.printMessage("CENTRAL EXISTS");
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -346,7 +361,7 @@ public class Controller {
                             Driver.printMessage("CENTRAL EXISTS");
                             String message = "\"READREQUESTCOMBINE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans st = new SerializableTrans(t.getQuery());
+                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
                             byte[] trans = serialize(st);
                             byte[] fin = byteConcat(prefix, trans);
                             myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -366,7 +381,7 @@ public class Controller {
                             Driver.printMessage("CENTRAL EXISTS");
                             String message = "\"READREQUESTCOMBINE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans st = new SerializableTrans(t.getQuery());
+                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
                             byte[] trans = serialize(st);
                             byte[] fin = byteConcat(prefix, trans);
                             myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
@@ -379,6 +394,33 @@ public class Controller {
                 }
             }
         }
+    }
+    
+    
+    public void commitPendingWrite(){
+    	if(pendingWrite!=null){
+	    	pendingWrite.end();
+	    	pendingWrite = null;
+    	}
+    }
+    
+    public void partialCommit(Transaction t){
+    	pendingWrite = (Transaction1)t;
+    	try {
+    		pendingWrite.beginTransaction();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	pendingWrite.start();
+    }
+    
+    public boolean isAddressOf(String host, InetAddress address){
+    	return myClient.getAddressFromName(host).equals(address);
+    }
+    
+    public InetAddress getAddressOf(String host){
+    	return myClient.getAddressFromName(host);
     }
 
     public static byte[] byteConcat(byte[] A, byte[] B) {
@@ -463,4 +505,5 @@ public class Controller {
     public void setCs(CachedRowSetImpl cs) {
         this.cs = cs;
     }
+
 }

@@ -27,7 +27,7 @@ public class Constants {
 	public static final String PQUERY_TITLE7 = "Palawan Query 7";
 	public static final String PQUERY_TITLE8 = "Palawan Query 8";
 	
-	public static final String MQUERY_1 = "Marinduque Query 1";
+	public static final String MQUERY_1 = "SELECT d.hpq_hh_id, d.mdeadage, m.deady FROM hpq_death d";
 	public static final String MQUERY_2 = "Marinduque Query 2";
 	public static final String MQUERY_3 = "Marinduque Query 3";
 	public static final String MQUERY_4 = "Marinduque Query 4";
