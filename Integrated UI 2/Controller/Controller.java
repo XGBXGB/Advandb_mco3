@@ -238,6 +238,13 @@ public class Controller {
             }
             Driver.printResultSet(t.getResultSet());
         } else if (name.equalsIgnoreCase("CENTRAL")) {
+        	String editQuery="";
+        	if(t.getQuery().contains("WHERE")){
+        		editQuery= t.getQuery()+" AND location='Palawan' ";
+        	}else{
+        		editQuery= t.getQuery()+" WHERE location='Palawan' ";
+        	}
+        	t.setQuery(editQuery);
             Thread x = new Thread(t);
             x.start();
             while (true) {
@@ -249,6 +256,14 @@ public class Controller {
         } else if (name.equalsIgnoreCase("MARINDUQUE")) {
             if (myClient.checkCentralIfExists()) {
                 try {
+                	String editQuery="";
+                	if(t.getQuery().contains("WHERE")){
+                		editQuery= t.getQuery()+" AND location='Palawan' ";
+                	}else{
+                		editQuery= t.getQuery()+" WHERE location='Palawan' ";
+                	}
+                	t.setQuery(editQuery);
+                	
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
                     SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
@@ -287,6 +302,13 @@ public class Controller {
             }
             Driver.printResultSet(t.getResultSet());
         } else if (name.equalsIgnoreCase("CENTRAL")) {
+        	String editQuery="";
+        	if(t.getQuery().contains("WHERE")){
+        		editQuery= t.getQuery()+" AND location='Marinduque' ";
+        	}else{
+        		editQuery= t.getQuery()+" WHERE location='Marinduque' ";
+        	}
+        	t.setQuery(editQuery);
             Thread x = new Thread(t);
             x.start();
             while (true) {
@@ -298,6 +320,13 @@ public class Controller {
         } else if (name.equalsIgnoreCase("PALAWAN")) {
             if (myClient.checkCentralIfExists()) {
                 try {
+                	String editQuery="";
+                	if(t.getQuery().contains("WHERE")){
+                		editQuery= t.getQuery()+" AND location='Marinduque' ";
+                	}else{
+                		editQuery= t.getQuery()+" WHERE location='Marinduque' ";
+                	}
+                	t.setQuery(editQuery);
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
                     SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
