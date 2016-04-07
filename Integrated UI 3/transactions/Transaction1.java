@@ -85,6 +85,8 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 				con.commit();
 			else
 				con.rollback();
+			String unlock = "UNLOCK TABLES;";
+			stmt.execute(unlock);
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -122,8 +124,7 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 			stmt.execute(lock);
 			String SQL = query;
 			stmt.executeUpdate(SQL);
-			String unlock = "UNLOCK TABLES;";
-			stmt.execute(unlock);
+			
 			isDonePopulating = true;
 			
 		}catch(SQLException e){
