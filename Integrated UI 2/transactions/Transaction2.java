@@ -147,7 +147,7 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	@Override
 	public String getScope() {
 		// TODO Auto-generated method stub
-		return null;
+		return scope;
 	}
 
 

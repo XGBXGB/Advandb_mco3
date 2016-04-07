@@ -31,8 +31,8 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 
 import Controller.Controller;
-import Transaction.Transaction;
-import Transaction.Transaction1;
+import transactions.Transaction;
+import transactions.Transaction1;
 
 public class MainFrame extends JFrame{
 	private static JTabbedPane tabbedPane;
@@ -42,7 +42,7 @@ public class MainFrame extends JFrame{
 	private Controller c;
 	private static ArrayList<TransactionPanel> transactionList = new ArrayList<TransactionPanel>();
 	private JComboBox isolvlOptions;
-	private static JTextArea logger;
+	private JTextArea logger;
 	
 	public MainFrame(Controller c) {
 		try
@@ -213,9 +213,11 @@ public class MainFrame extends JFrame{
 			// send needed info to controller
 			ArrayList<Transaction> transactions = new ArrayList<Transaction>();
 			for (String tablename : transNames ){
-				transactions.add((findTransPanel(tablename)).getTransactionDetails());
+				Transaction t = (findTransPanel(tablename)).getTransactionDetails();
+				t.setIsolationLevel(getIsoLevel());
+				transactions.add(t);
 			}
-			//this.c.executeTransactions(query, scope, query2, scope2, isGlobal);
+			this.c.executeTransactions(transactions);
 		}
 	}
 	
@@ -243,14 +245,14 @@ public class MainFrame extends JFrame{
 	}
 	
 	public void updateTable( String tableName, ResultSet rs){
-		(findTransPanel(tableName)).updateTable(rs);
+		(findTransPanel(tableName)).updateTable(rs);;
 	}
 	
-	public static void log (String message) {
-		if (!logger.getText().equals(""))
-			logger.setText(logger.getText() + "\n\n" + message);
+	public void log (String message) {
+		if (!this.logger.getText().equals(""))
+			this.logger.setText(this.logger.getText() + "\n\n" + message);
 		else
-			logger.setText( message);
+			this.logger.setText( message);
 	}
 	
 	public class ButtonListener implements ActionListener{

@@ -34,9 +34,9 @@ import javax.swing.table.DefaultTableModel;
 import Model.Column;
 import Model.ComboBoxConstants;
 import Model.Constants;
-import Transaction.Transaction;
-import Transaction.Transaction1;
-import Transaction.Transaction2;
+import transactions.Transaction;
+import transactions.Transaction1;
+import transactions.Transaction2;
 
 public class TransactionPanel extends JPanel{
 	
@@ -311,6 +311,9 @@ public class TransactionPanel extends JPanel{
 	            		case Constants.PQUERY_TITLE3: return Constants.PQUERY_3;
 	            		case Constants.PQUERY_TITLE4: return Constants.PQUERY_4;
 	            		case Constants.PQUERY_TITLE5: return Constants.PQUERY_5;
+	            		case Constants.PQUERY_TITLE6: return Constants.PQUERY_6;
+	            		case Constants.PQUERY_TITLE7: return Constants.PQUERY_7;
+	            		case Constants.PQUERY_TITLE8: return Constants.PQUERY_8;
 	            	}
 	            }
             }
@@ -322,6 +325,9 @@ public class TransactionPanel extends JPanel{
 	            		case Constants.MQUERY_TITLE3: return Constants.MQUERY_3;
 	            		case Constants.MQUERY_TITLE4: return Constants.MQUERY_4;
 	            		case Constants.MQUERY_TITLE5: return Constants.MQUERY_5;
+	            		case Constants.MQUERY_TITLE6: return Constants.MQUERY_6;
+	            		case Constants.MQUERY_TITLE7: return Constants.MQUERY_7;
+	            		case Constants.MQUERY_TITLE8: return Constants.MQUERY_8;
 	            	}
 	            }
             }
@@ -371,10 +377,6 @@ public class TransactionPanel extends JPanel{
 		
 		String having = "";
 		String where = "";
-		String firstWhere = "WHERE ";
-		if (query.equals(Constants.PQUERY_1) || query.equals(Constants.MQUERY_1)){
-			firstWhere = "AND ";
-		}
 		
 		if (!(lowerChoices.isEmpty())){
 			Collections.sort(lowerChoices, new SecondWordComparator());
@@ -393,7 +395,7 @@ public class TransactionPanel extends JPanel{
 				}
 				else{
 					if (!editedWhere){
-						where += firstWhere + " (" + condition1.substring(4, condition1.length()) + " \n";
+						where += "WHERE (" + condition1.substring(4, condition1.length()) + " \n";
 					}
 					if (i!=0){
 						if (isSame ){
@@ -417,8 +419,8 @@ public class TransactionPanel extends JPanel{
 			if (editedWhere)
 				where += ") \n";
 		}
-		MainFrame.log(query + where);
-		return query + where;
+		System.out.println(where);
+		return query;
 	}
 	
 	public Transaction getTransactionDetails(){
@@ -426,11 +428,10 @@ public class TransactionPanel extends JPanel{
 		Transaction transaction = null;
 		if (query.contains("UPDATE") || query.contains("DELETE")){
 			transaction = new Transaction1(query, getArea(), getBooleanAbort());
-			transaction.setName(this.getName());
 		}
 		else if (query.contains("SELECT")){
 			transaction = new Transaction2(query, getArea() );
-			transaction.setName(this.getName());
+			// abort?
 		}
 		return transaction;
 	}
