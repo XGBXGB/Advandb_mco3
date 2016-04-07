@@ -20,6 +20,7 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	volatile CachedRowSetImpl cs;
 	volatile boolean donePopulating;
 	int iso_level;
+	String name;
 	
 	public Transaction2(String query, String scope, int iso_level){
 		this.scope = scope;
@@ -159,6 +160,20 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 		// TODO Auto-generated method stub
 		return iso_level;
 	}
+	
+	@Override
+	public void setName(String name) {
+		// TODO Auto-generated method stub
+		this.name = name;
+		
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return name;
+	}
+
 
 
 }

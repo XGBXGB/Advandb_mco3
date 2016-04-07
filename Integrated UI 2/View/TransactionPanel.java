@@ -34,9 +34,9 @@ import javax.swing.table.DefaultTableModel;
 import Model.Column;
 import Model.ComboBoxConstants;
 import Model.Constants;
-import Transaction.Transaction;
-import Transaction.Transaction1;
-import Transaction.Transaction2;
+import transactions.Transaction;
+import transactions.Transaction1;
+import transactions.Transaction2;
 
 public class TransactionPanel extends JPanel{
 	
@@ -425,11 +425,11 @@ public class TransactionPanel extends JPanel{
 		String query = getQuery();
 		Transaction transaction = null;
 		if (query.contains("UPDATE") || query.contains("DELETE")){
-			transaction = new Transaction1(query, getArea(), getBooleanAbort());
+			transaction = new Transaction1(query, getArea(), getBooleanAbort(), MainFrame.getIsoLevel());
 			transaction.setName(this.getName());
 		}
 		else if (query.contains("SELECT")){
-			transaction = new Transaction2(query, getArea() );
+			transaction = new Transaction2(query, getArea(), MainFrame.getIsoLevel() );
 			transaction.setName(this.getName());
 		}
 		return transaction;

@@ -31,8 +31,8 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 
 import Controller.Controller;
-import Transaction.Transaction;
-import Transaction.Transaction1;
+import transactions.Transaction;
+import transactions.Transaction1;
 
 public class MainFrame extends JFrame{
 	private static JTabbedPane tabbedPane;
@@ -41,7 +41,7 @@ public class MainFrame extends JFrame{
 	private JButton runBtn;
 	private Controller c;
 	private static ArrayList<TransactionPanel> transactionList = new ArrayList<TransactionPanel>();
-	private JComboBox isolvlOptions;
+	private static JComboBox isolvlOptions;
 	private static JTextArea logger;
 	
 	public MainFrame(Controller c) {
@@ -219,8 +219,8 @@ public class MainFrame extends JFrame{
 		}
 	}
 	
-	public int getIsoLevel(){
-		switch(this.isolvlOptions.getSelectedItem().toString()){
+	public static int getIsoLevel(){
+		switch(isolvlOptions.getSelectedItem().toString()){
 			case Transaction1.ISO_READ_COMMITTED_LBL : 
 				return Transaction1.ISO_READ_COMMITTED;
 			case Transaction1.ISO_READ_UNCOMMITTED_LBL : 

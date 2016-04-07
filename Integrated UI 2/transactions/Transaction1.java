@@ -21,6 +21,7 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 	boolean toCommit;
 	boolean isDonePopulating;
 	int iso_level;
+	String name;
 	
 	public Transaction1(String query, String scope, boolean toCommit, int iso_level){
 		this.query = query;
@@ -158,6 +159,19 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 	public int getIsolationLevel() {
 		// TODO Auto-generated method stub
 		return iso_level;
+	}
+
+	@Override
+	public void setName(String name) {
+		// TODO Auto-generated method stub
+		this.name = name;
+		
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return name;
 	}
 
 	
