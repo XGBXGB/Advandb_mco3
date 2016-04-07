@@ -239,7 +239,7 @@ public class Controller {
             printResultSet(t.getResultSet(),t.getName());
         } else if (name.equalsIgnoreCase("CENTRAL")) {
         	String editQuery="";
-        	if(t.getQuery().contains("WHERE")){
+        	if(t.getQuery().contains("WHERE") || t.getQuery().contains("where") || t.getQuery().contains("Where")){
         		editQuery= t.getQuery()+" AND location='Palawan' ";
         	}else{
         		editQuery= t.getQuery()+" WHERE location='Palawan' ";
@@ -257,7 +257,7 @@ public class Controller {
             if (myClient.checkCentralIfExists()) {
                 try {
                 	String editQuery="";
-                	if(t.getQuery().contains("WHERE")){
+                	if(t.getQuery().contains("WHERE") || t.getQuery().contains("where") || t.getQuery().contains("Where")){
                 		editQuery= t.getQuery()+" AND location='Palawan' ";
                 	}else{
                 		editQuery= t.getQuery()+" WHERE location='Palawan' ";
@@ -303,7 +303,7 @@ public class Controller {
             printResultSet(t.getResultSet(),t.getName());
         } else if (name.equalsIgnoreCase("CENTRAL")) {
         	String editQuery="";
-        	if(t.getQuery().contains("WHERE")){
+        	if(t.getQuery().contains("WHERE") || t.getQuery().contains("where") || t.getQuery().contains("Where")){
         		editQuery= t.getQuery()+" AND location='Marinduque' ";
         	}else{
         		editQuery= t.getQuery()+" WHERE location='Marinduque' ";
@@ -321,7 +321,7 @@ public class Controller {
             if (myClient.checkCentralIfExists()) {
                 try {
                 	String editQuery="";
-                	if(t.getQuery().contains("WHERE")){
+                	if(t.getQuery().contains("WHERE") || t.getQuery().contains("where") || t.getQuery().contains("Where")){
                 		editQuery= t.getQuery()+" AND location='Marinduque' ";
                 	}else{
                 		editQuery= t.getQuery()+" WHERE location='Marinduque' ";

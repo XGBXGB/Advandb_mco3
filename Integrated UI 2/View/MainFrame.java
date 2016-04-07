@@ -215,6 +215,7 @@ public class MainFrame extends JFrame{
 			for (String tablename : transNames ){
 				transactions.add((findTransPanel(tablename)).getTransactionDetails());
 			}
+			this.c.executeTransactions(transactions);
 			//this.c.executeTransactions(query, scope, query2, scope2, isGlobal);
 		}
 	}
