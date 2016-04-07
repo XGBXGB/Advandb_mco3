@@ -20,13 +20,15 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 	CachedRowSetImpl cs;
 	boolean toCommit;
 	boolean isDonePopulating;
+	int iso_level;
 	
-	public Transaction1(String query, String scope, boolean toCommit){
+	public Transaction1(String query, String scope, boolean toCommit, int iso_level){
 		this.query = query;
 		this.scope = scope;
 		con = DBConnect.getConnection();
 		isDonePopulating = false;
 		this.toCommit = toCommit;
+		this.iso_level = iso_level;
 	}
 	
 	@Override
@@ -150,6 +152,12 @@ public class Transaction1 implements Transaction, Runnable, Serializable{
 
 	public boolean isToCommit() {
 		return toCommit;
+	}
+
+	@Override
+	public int getIsolationLevel() {
+		// TODO Auto-generated method stub
+		return iso_level;
 	}
 
 	

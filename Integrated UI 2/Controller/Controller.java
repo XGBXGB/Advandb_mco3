@@ -43,7 +43,7 @@ public class Controller {
     
 
     public Controller() {
-    	new MainFrame(this);
+    	//new MainFrame(this);
         transactions = new ArrayList();
         myClient = null;
         myServer = null;
@@ -82,7 +82,7 @@ public class Controller {
             	try {
             		String message = "\"ORDERWRITE\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(sertrans);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -97,7 +97,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -112,7 +112,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -132,7 +132,7 @@ public class Controller {
             		partialCommit(t);
             		String message = "\"ORDERWRITE\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(sertrans);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
@@ -147,7 +147,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -162,7 +162,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -184,7 +184,7 @@ public class Controller {
             		pendingWrite.start();
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -205,7 +205,7 @@ public class Controller {
             		pendingWrite.start();
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -266,7 +266,7 @@ public class Controller {
                 	
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -277,7 +277,7 @@ public class Controller {
             	try {
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -329,7 +329,7 @@ public class Controller {
                 	t.setQuery(editQuery);
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -341,7 +341,7 @@ public class Controller {
             	try {
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
@@ -372,7 +372,7 @@ public class Controller {
                     Driver.printMessage("CENTRAL EXISTS");
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -390,7 +390,7 @@ public class Controller {
                             Driver.printMessage("CENTRAL EXISTS");
                             String message = "\"READREQUESTCOMBINE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(),t.getIsolationLevel());
                             byte[] trans = serialize(st);
                             byte[] fin = byteConcat(prefix, trans);
                             myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -410,7 +410,7 @@ public class Controller {
                             Driver.printMessage("CENTRAL EXISTS");
                             String message = "\"READREQUESTCOMBINE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope());
+                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
                             byte[] trans = serialize(st);
                             byte[] fin = byteConcat(prefix, trans);
                             myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));

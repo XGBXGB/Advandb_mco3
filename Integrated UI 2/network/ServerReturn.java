@@ -48,7 +48,8 @@ public class ServerReturn{
 	        	if(messageType.contains("\"READREQUEST\"")){
 	        		parent.printMessage("IN READREQUEST");
 	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
-	        		Transaction2 t = new Transaction2(st.getQuery(),"");
+	        		Transaction2 t = new Transaction2(st.getQuery(),st.getScope(), st.getIso_level());
+	        		t.setIsolationLevel(st.getIso_level());
 	            	t.beginTransaction();
 	            	t.start();
 	            	DatabaseObject dbo = new DatabaseObject(t.getResultSet());
@@ -65,7 +66,8 @@ public class ServerReturn{
 	        		parent.printResultSet(rs);
 	        	}else if(messageType.contains("\"READREQUESTCOMBINE\"")){
 	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
-	        		Transaction2 t = new Transaction2(st.getQuery(),"");
+	        		Transaction2 t = new Transaction2(st.getQuery(),st.getScope(), st.getIso_level());
+	        		t.setIsolationLevel(st.getIso_level());
 	            	t.beginTransaction();
 	            	t.start();
 	            	DatabaseObject dbo = new DatabaseObject(t.getResultSet());
@@ -143,13 +145,14 @@ public class ServerReturn{
 	        		parent.printMessage("IN WRITEREQUEST");
 	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
 	        		System.out.println("SCOPPEEEE: "+st.getScope());
-	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit());
+	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit(), st.getIso_level());
+	        		t.setIsolationLevel(st.getIso_level());
 	            	parent.partialCommit(t);
 	            	
 	            	if(t.getScope().equalsIgnoreCase("PALAWAN")){
 	            		if(parent.isAddressOf("PALAWAN", X.getInetAddress())){
 	            			String msg = "\"GOCOMMIT\" ";
-	    	            	SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+	    	            	SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit(), t.getIsolationLevel());
 	    	            	byte[] prefix = msg.getBytes();
 	                        byte[] trans = serialize(sertrans);
 	                        byte[] fin = byteConcat(prefix, trans);
@@ -157,7 +160,7 @@ public class ServerReturn{
 	            		}else{
 	            			String message = "\"ORDERWRITE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit(), t.getIsolationLevel());
                             byte[] trans = serialize(sertrans);
                             byte[] fin = byteConcat(prefix, trans);
                             parent.sendToHost(fin, parent.getAddressOf("PALAWAN"));
@@ -165,7 +168,7 @@ public class ServerReturn{
 	            	}else if(t.getScope().equalsIgnoreCase("MARINDUQUE")){
 	            		if(parent.isAddressOf("MARINDUQUE", X.getInetAddress())){
 	            			String msg = "\"GOCOMMIT\" ";
-	    	            	SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+	    	            	SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit(), t.getIsolationLevel());
 	    	            	byte[] prefix = msg.getBytes();
 	                        byte[] trans = serialize(sertrans);
 	                        byte[] fin = byteConcat(prefix, trans);
@@ -173,7 +176,7 @@ public class ServerReturn{
 	            		}else{
 	            			String message = "\"ORDERWRITE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit());
+                            SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), t.isToCommit(), t.getIsolationLevel());
                             byte[] trans = serialize(sertrans);
                             byte[] fin = byteConcat(prefix, trans);
                             parent.sendToHost(fin, parent.getAddressOf("MARINDUQUE"));
@@ -181,7 +184,8 @@ public class ServerReturn{
 	            	}
 	        	}else if(messageType.contains("\"GOCOMMIT\"")){
 	        		SerializableTrans st = (SerializableTrans) deserialize(mybytearray);
-	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit());
+	        		Transaction1 t = new Transaction1(st.getQuery(),st.getScope(), st.isToCommit(), st.getIso_level());
+	        		t.setIsolationLevel(st.getIso_level());
 	            	t.beginTransaction();
 	            	t.start();
 	            	t.end();
@@ -189,8 +193,9 @@ public class ServerReturn{
 	        		parent.sendToHost(msg.getBytes(), X.getInetAddress());
 	        	}else if(messageType.contains("\"ORDERWRITE\"")){
 	        		SerializableTrans writetrans = (SerializableTrans) deserialize(mybytearray);
-	        		Transaction1 t = new Transaction1(writetrans.getQuery(),writetrans.getScope(), writetrans.isToCommit());
-	            	t.beginTransaction();
+	        		Transaction1 t = new Transaction1(writetrans.getQuery(),writetrans.getScope(), writetrans.isToCommit(), writetrans.getIso_level());
+	            	t.setIsolationLevel(writetrans.getIso_level());
+	        		t.beginTransaction();
 	            	t.start();
 	            	t.end();
 	            	

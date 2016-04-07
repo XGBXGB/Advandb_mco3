@@ -19,13 +19,15 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	Statement stmt;
 	volatile CachedRowSetImpl cs;
 	volatile boolean donePopulating;
+	int iso_level;
 	
-	public Transaction2(String query, String scope){
+	public Transaction2(String query, String scope, int iso_level){
 		this.scope = scope;
 		cs = null;
 		this.query = query;
 		con = DBConnect.getConnection();
 		donePopulating = false;
+		this.iso_level = iso_level;
 	}
 	
 	
@@ -146,6 +148,16 @@ public class Transaction2 implements Transaction, Serializable, Runnable{
 	public String getScope() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+
+
+
+	@Override
+	public int getIsolationLevel() {
+		// TODO Auto-generated method stub
+		return iso_level;
 	}
 
 

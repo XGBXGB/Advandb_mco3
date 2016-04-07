@@ -22,6 +22,8 @@ public interface Transaction {
 	
 	public void setIsolationLevel(int iso_level);
 	
+	public int getIsolationLevel();
+	
 	public void beginTransaction() throws SQLException;
 	
 	public CachedRowSetImpl getResultSet();
