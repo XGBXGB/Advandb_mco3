@@ -3,16 +3,16 @@ package View;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
@@ -20,7 +20,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,6 +34,9 @@ import javax.swing.table.DefaultTableModel;
 import Model.Column;
 import Model.ComboBoxConstants;
 import Model.Constants;
+import Transaction.Transaction;
+import Transaction.Transaction1;
+import Transaction.Transaction2;
 
 public class TransactionPanel extends JPanel{
 	
@@ -49,6 +51,7 @@ public class TransactionPanel extends JPanel{
 	private JComboBox areaOptions;
 	private JComboBox acOptions;
 	private ButtonGroup group;
+	private ArrayList<String> queriesList = Constants.MARINDUQUE_Q_TITLES;
 	
 	private static final int CUST_HEIGHT = 110;
 	
@@ -108,16 +111,19 @@ public class TransactionPanel extends JPanel{
 	    scroll.setPreferredSize(new Dimension(50,50));
 	    
 	    group = new ButtonGroup();
-	    addQueryChoice(Constants.QUERY_1);
-	    addQueryChoice(Constants.QUERY_2);
-	    addQueryChoice(Constants.QUERY_3);
-	    addQueryChoice(Constants.QUERY_4);
-	    addQueryChoice(Constants.QUERY_5);
-	    addQueryChoice(Constants.QUERY_6);
-	    addQueryChoice(Constants.QUERY_7);
 	    
 	    leftPanel.add(scroll, BorderLayout.CENTER);
 	    return leftPanel;
+	}
+	
+	public void updateQueryList(){
+		queriesHolder.removeAll();
+		queriesHolder.revalidate();
+		queriesHolder.repaint();
+		
+		for (String title : queriesList){
+			addQueryChoice(title);
+		}
 	}
 	
 	public void addQueryChoice(String text) {
@@ -214,7 +220,8 @@ public class TransactionPanel extends JPanel{
 		la.setHorizontalAlignment(SwingConstants.RIGHT);
 		addBtnContainer.add(la, new Float(1));
 		
-		areaOptions = new JComboBox(new String[] {"Marinduque", "Palawan", "Both"});
+		areaOptions = new JComboBox(new String[] {Constants.AREA_MARINDUQUE, Constants.AREA_PALAWAN, Constants.AREA_BOTH});
+		areaOptions.addActionListener(new ButtonListener());
 		areaOptions.setSelectedIndex(0);
 		addBtnContainer.add(areaOptions, new Float(1.5));
 		
@@ -292,22 +299,40 @@ public class TransactionPanel extends JPanel{
 		return funcList.stream().toArray(String[]::new);
 	}
 	
-	public int getQuerySelected() {
+	public String getQuerySelected() {
         for (Enumeration<AbstractButton> buttons = group.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
-            if (button.isSelected()) {
-            	switch(button.getText()){
-            		case Constants.QUERY_1: return 1;
-            		case Constants.QUERY_2: return 2;
-            		case Constants.QUERY_3: return 3;
-            		case Constants.QUERY_4: return 4;
-            		case Constants.QUERY_5: return 5;
-            		case Constants.QUERY_6: return 6;
-            		case Constants.QUERY_7: return 7;
-            	}
+            
+            if (this.queriesList.equals(Constants.PALAWAN_Q_TITLES)){
+	            if (button.isSelected()) {
+	            	switch(button.getText()){
+	            		case Constants.PQUERY_TITLE1: return Constants.PQUERY_1;
+	            		case Constants.PQUERY_TITLE2: return Constants.PQUERY_2;
+	            		case Constants.PQUERY_TITLE3: return Constants.PQUERY_3;
+	            		case Constants.PQUERY_TITLE4: return Constants.PQUERY_4;
+	            		case Constants.PQUERY_TITLE5: return Constants.PQUERY_5;
+	            		case Constants.PQUERY_TITLE6: return Constants.PQUERY_6;
+	            		case Constants.PQUERY_TITLE7: return Constants.PQUERY_7;
+	            		case Constants.PQUERY_TITLE8: return Constants.PQUERY_8;
+	            	}
+	            }
+            }
+            else if (this.queriesList.equals(Constants.MARINDUQUE_Q_TITLES)){
+	            if (button.isSelected()) {
+	            	switch(button.getText()){
+	            		case Constants.MQUERY_TITLE1: return Constants.MQUERY_1;
+	            		case Constants.MQUERY_TITLE2: return Constants.MQUERY_2;
+	            		case Constants.MQUERY_TITLE3: return Constants.MQUERY_3;
+	            		case Constants.MQUERY_TITLE4: return Constants.MQUERY_4;
+	            		case Constants.MQUERY_TITLE5: return Constants.MQUERY_5;
+	            		case Constants.MQUERY_TITLE6: return Constants.MQUERY_6;
+	            		case Constants.MQUERY_TITLE7: return Constants.MQUERY_7;
+	            		case Constants.MQUERY_TITLE8: return Constants.MQUERY_8;
+	            	}
+	            }
             }
         }
-        return -1;
+        return "";
 	}
 	
 	public String getArea(){
@@ -315,24 +340,134 @@ public class TransactionPanel extends JPanel{
 	}
 	
 	public boolean getBooleanAbort(){
-		if (this.acOptions.getSelectedItem().equals("Abort"))
+		if (this.acOptions.getSelectedItem().equals("Commit"))
 			return true;
 		return false;
+	}
+	
+	public String getQuery(){
+		String query = getQuerySelected();
+		ArrayList<String> lowerChoices = new ArrayList<String>();
+		for( Component comp : bottomPanel.getComponents() ) {
+			String condition = "";
+			for ( Component c : ((Container) comp).getComponents()){
+				String text = "";
+				if( c instanceof JComboBox){
+					text = (String)((JComboBox)c).getSelectedItem();
+				   	if (!(text.equals("AND") || text.equals("OR"))){
+				   		try{
+				   			text = ComboBoxConstants.findColumn(text).getColName();
+				   		}
+				   		catch (NullPointerException e){}
+				   	}
+				}
+				else if (c instanceof JTextField){
+					text = (String) ((JTextField)c).getText();
+					if (!(text.equalsIgnoreCase("NULL") || text.equalsIgnoreCase("NOT NULL"))){
+						text = "'" + (String) ((JTextField)c).getText() + "'";
+					}
+				}
+				condition += text + " ";
+			}
+			if (!(condition.contains("AND") || condition.contains("OR"))){
+				condition = "AND " + condition;
+			}
+			lowerChoices.add(condition);
+		}
+		
+		String having = "";
+		String where = "";
+		
+		if (!(lowerChoices.isEmpty())){
+			Collections.sort(lowerChoices, new SecondWordComparator());
+			boolean isSame = false, editedWhere = false, editedHaving = false;
+			for (int i = 0; i < lowerChoices.size(); i++){
+				String condition1 = lowerChoices.get(i);
+				String[] temp1 = condition1.split(" ");
+				if (condition1.contains("SUM")){
+					if (!editedHaving){
+						having = "HAVING (" + condition1.substring(4, condition1.length()) + " \n";
+					}
+					else{
+						having += condition1 + " \n";
+					}
+					editedHaving = true;
+				}
+				else{
+					if (!editedWhere){
+						where += "WHERE (" + condition1.substring(4, condition1.length()) + " \n";
+					}
+					if (i!=0){
+						if (isSame ){
+							where += condition1 + " \n";
+						}
+						else{
+							where += ") \n" + temp1[0] + "(" + condition1.substring(temp1[0].length(), condition1.length()) + " \n";
+						}
+					}
+					editedWhere = true;
+				}
+				if (i == lowerChoices.size()-1){
+					break;
+				}
+				String condition2 = lowerChoices.get(i+1);
+				String[] temp2 = condition2.split(" ");
+				isSame = temp1[1].equals(temp2[1]);
+			}
+			if (editedHaving)
+				having += ") \n";
+			if (editedWhere)
+				where += ") \n";
+		}
+		System.out.println(where);
+		return query;
+	}
+	
+	public Transaction getTransactionDetails(){
+		String query = getQuery();
+		Transaction transaction = null;
+		if (query.contains("UPDATE") || query.contains("DELETE")){
+			transaction = new Transaction1(query, getArea() );
+			// abort?
+		}
+		else if (query.contains("SELECT")){
+			transaction = new Transaction2(query, getArea() );
+			// abort?
+		}
+		return transaction;
 	}
 	
 	public class ButtonListener implements ActionListener{
 	    @Override
 		public void actionPerformed(ActionEvent e) {
-	    	JButton button = (JButton) e.getSource();
-	    	if (button.getText().equals("Remove")){
-	    		MainFrame.deleteTransactionPanel((JPanel)button.getParent().getParent().getParent().getParent());
+	    	
+	    	if (e.getSource() instanceof JButton){
+		    	JButton button = (JButton) e.getSource();
+		    	if (button.getText().equals("Remove")){
+		    		MainFrame.deleteTransactionPanel((JPanel)button.getParent().getParent().getParent().getParent());
+		    	}
+		    	else if (button == btnAdd){
+		    		addFilteringOption();
+		    	}
+		    	else {
+		    		JPanel panel = (JPanel)button.getParent();
+		    		removeFilteringOption(panel);
+		    	}
 	    	}
-	    	else if (button == btnAdd){
-	    		addFilteringOption();
-	    	}
-	    	else {
-	    		JPanel panel = (JPanel)button.getParent();
-	    		removeFilteringOption(panel);
+	    	else if (e.getSource() instanceof JComboBox){
+	    		switch(((JComboBox)e.getSource()).getSelectedItem().toString()){
+	    			case Constants.AREA_MARINDUQUE: 
+	    				queriesList = Constants.MARINDUQUE_Q_TITLES; 
+	    				break;
+	    			case Constants.AREA_PALAWAN: 	
+	    				queriesList = Constants.PALAWAN_Q_TITLES; 
+	    				break;
+	    			default: 
+	    				queriesList = Constants.PALAWAN_Q_TITLES;
+						queriesList.addAll(Constants.MARINDUQUE_Q_TITLES);
+						break;
+	    		}
+	    		updateQueryList();
 	    	}
 		}
 	}

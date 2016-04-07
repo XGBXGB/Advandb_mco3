@@ -31,6 +31,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 
 import Controller.Controller;
+import Transaction.Transaction;
 import Transaction.Transaction1;
 
 public class MainFrame extends JFrame{
@@ -210,7 +211,10 @@ public class MainFrame extends JFrame{
 		}
 		else {
 			// send needed info to controller
-			
+			ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+			for (String tablename : transNames ){
+				transactions.add((findTransPanel(tablename)).getTransactionDetails());
+			}
 		}
 	}
 	
@@ -229,12 +233,16 @@ public class MainFrame extends JFrame{
 		}
 	}
 	
-	public void updateTable( String tableName, ResultSet rs){
-		for(int i = 0; i < transactionList.size(); i++) {
-			if(tableName.equals(transactionList.get(i).getName())) {
-				transactionList.get(i).updateTable(rs);
-			}
+	public TransactionPanel findTransPanel(String name){
+		for (TransactionPanel panel : transactionList){
+			if (panel.getName().equals(name))
+				return panel;
 		}
+		return null;
+	}
+	
+	public void updateTable( String tableName, ResultSet rs){
+		(findTransPanel(tableName)).updateTable(rs);;
 	}
 	
 	public void log (String message) {
@@ -253,7 +261,6 @@ public class MainFrame extends JFrame{
 	    	}
 	    	else if (button == runBtn){
 	    		runTransactions();
-	    		
 	    	}
 	    	else {
 	    		
