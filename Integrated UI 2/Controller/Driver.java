@@ -19,18 +19,18 @@ public class Driver {
 		
 		Controller runner = new Controller();
 		boolean isLocal = true;
-		runner.setName("PALAWAN");
+		runner.setName("CENTRAL");
 		runner.startServer(PORT);
 		runner.startClient();
 		Scanner sc = new Scanner(System.in);
 		int condition=0;
 		
-		ArrayList<Transaction> transs = new ArrayList();
+		/*ArrayList<Transaction> transs = new ArrayList();
 		transs.add(new Transaction1("UPDATE hpq_death SET mdeadage = '500' WHERE hpq_hh_id = 203424","MARINDUQUE", true,Transaction.ISO_READ_UNCOMMITTED));
 		transs.add(new Transaction2("SELECT hpq_hh_id, death_line, mdeadsx, mdeadage, mdeady, mdeady_o FROM hpq_death","MARINDUQUE",Transaction.ISO_READ_UNCOMMITTED));
 	
 		condition = sc.nextInt();
-		runner.executeTransactions(transs);
+		runner.executeTransactions(transs);*/
 	
 	}
 	

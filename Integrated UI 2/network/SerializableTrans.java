@@ -6,20 +6,33 @@ public class SerializableTrans implements Serializable{
 	private String scope;
 	private boolean toCommit;
 	private int iso_level;
+	private String transName;
 	
-	public SerializableTrans(String query, String scope, int iso_level) {
+	
+	
+	public String getTransName() {
+		return transName;
+	}
+
+	public void setTransName(String transName) {
+		this.transName = transName;
+	}
+
+	public SerializableTrans(String query, String scope, int iso_level, String transName) {
 		super();
 		this.query = query;
 		this.scope = scope;
 		toCommit = true;
 		this.iso_level = iso_level;
+		this.transName = transName;
 	}
 	
-	public SerializableTrans(String query, String scope, boolean toCommit, int iso_level) {
+	public SerializableTrans(String query, String scope, boolean toCommit, int iso_level, String transName) {
 		super();
 		this.query = query;
 		this.scope = scope;
 		this.toCommit = toCommit;
+		this.transName = transName;
 	}
 		
 	public String getScope() {

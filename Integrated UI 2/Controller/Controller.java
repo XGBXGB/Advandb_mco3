@@ -82,7 +82,7 @@ public class Controller {
             	try {
             		String message = "\"ORDERWRITE\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(sertrans);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -97,7 +97,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -112,7 +112,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -132,7 +132,7 @@ public class Controller {
             		partialCommit(t);
             		String message = "\"ORDERWRITE\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(sertrans);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
@@ -147,7 +147,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -162,7 +162,7 @@ public class Controller {
             	try {
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -184,7 +184,7 @@ public class Controller {
             		pendingWrite.start();
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -205,7 +205,7 @@ public class Controller {
             		pendingWrite.start();
                     String message = "\"WRITEREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -236,7 +236,7 @@ public class Controller {
                     break;
                 }
             }
-            Driver.printResultSet(t.getResultSet());
+            printResultSet(t.getResultSet(),t.getName());
         } else if (name.equalsIgnoreCase("CENTRAL")) {
         	String editQuery="";
         	if(t.getQuery().contains("WHERE")){
@@ -252,7 +252,7 @@ public class Controller {
                     break;
                 }
             }
-            Driver.printResultSet(t.getResultSet());
+            printResultSet(t.getResultSet(),t.getName());
         } else if (name.equalsIgnoreCase("MARINDUQUE")) {
             if (myClient.checkCentralIfExists()) {
                 try {
@@ -266,7 +266,7 @@ public class Controller {
                 	
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -277,7 +277,7 @@ public class Controller {
             	try {
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -300,7 +300,7 @@ public class Controller {
                     break;
                 }
             }
-            Driver.printResultSet(t.getResultSet());
+            printResultSet(t.getResultSet(),t.getName());
         } else if (name.equalsIgnoreCase("CENTRAL")) {
         	String editQuery="";
         	if(t.getQuery().contains("WHERE")){
@@ -316,7 +316,7 @@ public class Controller {
                     break;
                 }
             }
-            Driver.printResultSet(t.getResultSet());
+            printResultSet(t.getResultSet(),t.getName());
         } else if (name.equalsIgnoreCase("PALAWAN")) {
             if (myClient.checkCentralIfExists()) {
                 try {
@@ -329,7 +329,7 @@ public class Controller {
                 	t.setQuery(editQuery);
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -341,7 +341,7 @@ public class Controller {
             	try {
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
@@ -365,14 +365,14 @@ public class Controller {
                     break;
                 }
             }
-            Driver.printResultSet(t.getResultSet());
+            printResultSet(t.getResultSet(),t.getName());
         } else {
             if (myClient.checkCentralIfExists()) {
                 try {
                     Driver.printMessage("CENTRAL EXISTS");
                     String message = "\"READREQUEST\" ";
                     byte[] prefix = message.getBytes();
-                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
+                    SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(st);
                     byte[] fin = byteConcat(prefix, trans);
                     myClient.SEND(fin, myClient.getAddressFromName("CENTRAL"));
@@ -390,7 +390,7 @@ public class Controller {
                             Driver.printMessage("CENTRAL EXISTS");
                             String message = "\"READREQUESTCOMBINE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(),t.getIsolationLevel());
+                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(),t.getIsolationLevel(), t.getName());
                             byte[] trans = serialize(st);
                             byte[] fin = byteConcat(prefix, trans);
                             myClient.SEND(fin, myClient.getAddressFromName("PALAWAN"));
@@ -410,7 +410,7 @@ public class Controller {
                             Driver.printMessage("CENTRAL EXISTS");
                             String message = "\"READREQUESTCOMBINE\" ";
                             byte[] prefix = message.getBytes();
-                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel());
+                            SerializableTrans st = new SerializableTrans(t.getQuery(), t.getScope(), t.getIsolationLevel(), t.getName());
                             byte[] trans = serialize(st);
                             byte[] fin = byteConcat(prefix, trans);
                             myClient.SEND(fin, myClient.getAddressFromName("MARINDUQUE"));
@@ -517,12 +517,13 @@ public class Controller {
         this.iso_level = iso_level;
     }
 
-    public void printResultSet(CachedRowSetImpl rs) {
-        Driver.printResultSet(rs);
-        //main.updateTable(tableName, rs);
+    public void printResultSet(CachedRowSetImpl rs, String tableName) {
+        //Driver.printResultSet(rs);
+        main.updateTable(tableName, rs);
     }
 
     public void printCombinedResultSet(CachedRowSetImpl rs2) {
+    	//tablename = cs.getName();
         Driver.printResultSet(cs);
         cs = null;
         Driver.printResultSet(rs2);
