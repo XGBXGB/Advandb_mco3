@@ -1,9 +1,13 @@
 package Controller;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import Controller.Controller;
 import View.MainFrame;
+import transactions.Transaction;
+import transactions.Transaction1;
+import transactions.Transaction2;
 
 import com.sun.rowset.CachedRowSetImpl;
 
@@ -20,6 +24,10 @@ public class Driver {
 		runner.startClient();
 		Scanner sc = new Scanner(System.in);
 		int condition=0;
+		
+		ArrayList<Transaction> transs = new ArrayList();
+		transs.add(new Transaction1("UPDATE hpq_death SET mdeadage = '500' WHERE hpq_hh_id = 203424","MARINDUQUE", true,Transaction.ISO_READ_UNCOMMITTED));
+		transs.add(new Transaction2("SELECT hpq_hh_id, death_line, mdeadsx, mdeadage, mdeady, mdeady_o","MARINDUQUE",Transaction.ISO_READ_UNCOMMITTED));
 	}
 	
 	public static void printMessage(String message){
