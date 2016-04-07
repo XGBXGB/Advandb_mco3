@@ -35,7 +35,7 @@ public class Client implements Runnable{
         
         try {
         	//hosts.add(InetAddress.getByName("192.168.1.131"));
-			hosts.add(InetAddress.getByName("169.254.134.237"));
+			hosts.add(InetAddress.getByName("192.168.1.6"));
 			hosts.add(InetAddress.getByName("192.168.1.112"));
 			
 		} catch (UnknownHostException e) {
@@ -43,8 +43,8 @@ public class Client implements Runnable{
 			e.printStackTrace();
 		}
         //hosts.add(InetAddress.getByName("ip"));
-        names.add("MARINDUQUE");
         names.add("PALAWAN");
+        names.add("MARINDUQUE");
         
         
         //names.add("PALAWAN");

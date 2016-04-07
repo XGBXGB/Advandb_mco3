@@ -80,8 +80,10 @@ public class Controller {
         if (name.equalsIgnoreCase("CENTRAL")) {
             if (myClient.checkPalawanIfExists()) {
             	try {
+            		partialCommit(t);
             		String message = "\"ORDERWRITE\" ";
                     byte[] prefix = message.getBytes();
+                    System.out.println(((Transaction1)t).isToCommit()+" :INSIDE WRITEPALAWAN");
                     SerializableTrans sertrans = new SerializableTrans(t.getQuery(), t.getScope(), ((Transaction1)t).isToCommit(), t.getIsolationLevel(), t.getName());
                     byte[] trans = serialize(sertrans);
                     byte[] fin = byteConcat(prefix, trans);
