@@ -80,7 +80,7 @@ public class ServerReturn{
 	        	}else if(messageType.contains("\"RETURNREADREQUESTCOMBINE\"")){
 	        		DatabaseObject dbo = (DatabaseObject)deserialize(mybytearray);
 	        		CachedRowSetImpl rs = dbo.getResultSet();
-	        		parent.printCombinedResultSet(rs);
+	        		parent.printCombinedResultSet(rs, dbo.getTransName());
 	        		
 	        	/*}else if(messageType.contains("\"WRITEREQUEST\"")){
 	        		parent.printMessage("IN WRITEREQUEST");

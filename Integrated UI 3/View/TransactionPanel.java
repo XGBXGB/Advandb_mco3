@@ -77,7 +77,7 @@ public class TransactionPanel extends JPanel{
 		resultsPane.setLayout(new BorderLayout());
 		resultsPane.setBorder(BorderFactory.createEmptyBorder(10,2,3,2));
 		
-		resultsPane.add(new JScrollPane(createJTable(null)), BorderLayout.CENTER);
+		resultsPane.add(new JScrollPane(createJTable(null, null)), BorderLayout.CENTER);
 		
 		if (id > 2){
 			btnRemove = new JButton("Remove");
@@ -136,7 +136,7 @@ public class TransactionPanel extends JPanel{
 		queriesHolder.repaint();
 	}
 	
-	public JTable createJTable(ResultSet rs) {
+	public JTable createJTable(ResultSet rs, ResultSet rs2) {
 		if ( rs != null ){
 			JTable table = new JTable();
 			DefaultTableModel dataModel = new DefaultTableModel();
@@ -155,6 +155,22 @@ public class TransactionPanel extends JPanel{
 					dataModel.addRow(rowData);
 				}
 			} catch (SQLException e) {}
+			
+			if (rs2 != null){
+				try {
+					ResultSetMetaData mdata = rs2.getMetaData();
+					int colCount = mdata.getColumnCount();		
+					String[] colNames = getColumnNames(colCount, mdata);
+					dataModel.setColumnIdentifiers(colNames);
+					while (rs2.next()) {
+						String[] rowData = new String[colCount];
+						for (int i = 1; i <= colCount; i++) {
+							rowData[i - 1] = rs2.getString(i);
+						}
+						dataModel.addRow(rowData);
+					}
+				} catch (SQLException e) {}
+			}
 			
 			return table;
 		}
@@ -188,9 +204,9 @@ public class TransactionPanel extends JPanel{
 		} catch (ClassCastException e) {}
 	}
 	
-	public void updateTable(ResultSet rs) {
+	public void updateTable(ResultSet rs, ResultSet rs2) {
 		panelTemp.removeAll();
-		JTable table = createJTable(rs);
+		JTable table = createJTable(rs, rs2);
 		JScrollPane pane = new JScrollPane(table);
 		updateRowHeights(table);
 		panelTemp.add(pane, BorderLayout.CENTER);

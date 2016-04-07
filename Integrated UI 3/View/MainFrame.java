@@ -243,8 +243,8 @@ public class MainFrame extends JFrame{
 		return null;
 	}
 	
-	public void updateTable( String tableName, ResultSet rs){
-		(findTransPanel(tableName)).updateTable(rs);
+	public void updateTable( String tableName, ResultSet rs, ResultSet rs2){
+		(findTransPanel(tableName)).updateTable(rs, rs2);
 	}
 	
 	public static void log (String message) {

@@ -521,14 +521,15 @@ public class Controller {
 
     public void printResultSet(CachedRowSetImpl rs, String tableName) {
         //Driver.printResultSet(rs);
-        main.updateTable(tableName, rs);
+        main.updateTable(tableName, rs, null);
     }
 
-    public void printCombinedResultSet(CachedRowSetImpl rs2) {
+    public void printCombinedResultSet(CachedRowSetImpl rs2, String tableName) {
     	//tablename = cs.getName();
-        Driver.printResultSet(cs);
-        cs = null;
-        Driver.printResultSet(rs2);
+//        Driver.printResultSet(cs);
+//        cs = null;
+//        Driver.printResultSet(rs2);
+        main.updateTable(tableName, cs, rs2);
     }
 
     public CachedRowSetImpl getCs() {
