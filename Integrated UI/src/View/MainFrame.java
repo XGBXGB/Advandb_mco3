@@ -42,7 +42,7 @@ public class MainFrame extends JFrame{
 	private Controller c;
 	private static ArrayList<TransactionPanel> transactionList = new ArrayList<TransactionPanel>();
 	private JComboBox isolvlOptions;
-	private JTextArea logger;
+	private static JTextArea logger;
 	
 	public MainFrame(Controller c) {
 		try
@@ -246,11 +246,11 @@ public class MainFrame extends JFrame{
 		(findTransPanel(tableName)).updateTable(rs);;
 	}
 	
-	public void log (String message) {
-		if (!this.logger.getText().equals(""))
-			this.logger.setText(this.logger.getText() + "\n\n" + message);
+	public static void log (String message) {
+		if (!logger.getText().equals(""))
+			logger.setText(logger.getText() + "\n\n" + message);
 		else
-			this.logger.setText( message);
+			logger.setText( message);
 	}
 	
 	public class ButtonListener implements ActionListener{
