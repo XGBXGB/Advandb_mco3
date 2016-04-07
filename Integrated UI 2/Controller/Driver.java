@@ -15,11 +15,11 @@ public class Driver {
 	
 	
 	public static void main(String args[]) {
-		final int PORT=1212;
+		final int PORT=1313;
 		
 		Controller runner = new Controller();
 		boolean isLocal = true;
-		runner.setName("CENTRAL");
+		runner.setName("PALAWAN");
 		runner.startServer(PORT);
 		runner.startClient();
 		Scanner sc = new Scanner(System.in);

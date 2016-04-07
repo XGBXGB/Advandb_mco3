@@ -40,10 +40,10 @@ public class Controller {
     private ArrayList<String> queries, scopes;
     Transaction1 pendingWrite;
     Thread client, server;
-    
+    private MainFrame main;
 
     public Controller() {
-    	//new MainFrame(this);
+    	main = new MainFrame(this);
         transactions = new ArrayList();
         myClient = null;
         myServer = null;
@@ -519,6 +519,7 @@ public class Controller {
 
     public void printResultSet(CachedRowSetImpl rs) {
         Driver.printResultSet(rs);
+        //main.updateTable(tableName, rs);
     }
 
     public void printCombinedResultSet(CachedRowSetImpl rs2) {

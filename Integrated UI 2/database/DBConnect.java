@@ -28,7 +28,7 @@ public class DBConnect {
         url = "jdbc:mysql://localhost:3306/";
         database = "db_hpq?autoReconnect=true&useSSL=false";
         username = "root";
-        password = "xgbawesome";//tempo
+        password = "abc123";//tempo
     }
      
     /**
