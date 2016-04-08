@@ -52,7 +52,7 @@ public class TransactionPanel extends JPanel{
 	private JComboBox acOptions;
 	private ButtonGroup group;
 	private ArrayList<String> queriesList = Constants.MARINDUQUE_Q_TITLES;
-	
+	private JPanel resultsPane;
 	private static final int CUST_HEIGHT = 110;
 	
 	public TransactionPanel(){
@@ -73,7 +73,7 @@ public class TransactionPanel extends JPanel{
 	}
 	
 	public JPanel createResultsPanel(){
-		JPanel resultsPane = new JPanel();
+		resultsPane = new JPanel();
 		resultsPane.setLayout(new BorderLayout());
 		resultsPane.setBorder(BorderFactory.createEmptyBorder(10,2,3,2));
 		
@@ -205,13 +205,13 @@ public class TransactionPanel extends JPanel{
 	}
 	
 	public void updateTable(ResultSet rs, ResultSet rs2) {
-		panelTemp.removeAll();
+		resultsPane.removeAll();
 		JTable table = createJTable(rs, rs2);
 		JScrollPane pane = new JScrollPane(table);
 		updateRowHeights(table);
-		panelTemp.add(pane, BorderLayout.CENTER);
-		panelTemp.revalidate();
-		panelTemp.repaint();
+		resultsPane.add(pane, BorderLayout.CENTER);
+		resultsPane.revalidate();
+		resultsPane.repaint();
 	}
 	
 	public void setQuery(String query){
@@ -394,10 +394,6 @@ public class TransactionPanel extends JPanel{
 		
 		String having = "";
 		String where = "";
-		String firstWhere = "WHERE ";
-		if (query.equals(Constants.PQUERY_1) || query.equals(Constants.MQUERY_1)){
-			firstWhere = "AND ";
-		}
 		
 		if (!(lowerChoices.isEmpty())){
 			Collections.sort(lowerChoices, new SecondWordComparator());
@@ -416,7 +412,7 @@ public class TransactionPanel extends JPanel{
 				}
 				else{
 					if (!editedWhere){
-						where += firstWhere + " (" + condition1.substring(4, condition1.length()) + " \n";
+						where += "WHERE (" + condition1.substring(4, condition1.length()) + " \n";
 					}
 					if (i!=0){
 						if (isSame ){
